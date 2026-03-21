@@ -1,0 +1,5 @@
+questionary==2.1.1
+rich==13.9.4
+fpdf2==2.8.2
+python-dotenv==1.0.1
+PyYAML==6.0.2
