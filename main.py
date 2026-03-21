@@ -10,8 +10,10 @@ from core.runner import run_plugins_paralelo, run_plugin
 from core.smart_scan import filtrar_plugins_smart, detectar_tipo, categorias_recomendadas
 from core.report import gerar_relatorio
 from core.graph import gerar_grafo
+from core.health_check import check_dependencies
 
 console = Console()
+check_dependencies()
 
 def print_banner():
     print("\033c", end="")

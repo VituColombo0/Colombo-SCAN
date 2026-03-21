@@ -1,3 +1,5 @@
+import json
+import csv
 from fpdf import FPDF
 import datetime
 import os
@@ -52,8 +54,19 @@ def gerar_relatorio(alvo: str, resultados: list[dict]) -> str:
                 pass
         pdf.ln(4)
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    nome_arquivo = f"colombo_{alvo.replace(' ', '_')[:30]}_{ts}.pdf"
-    caminho = os.path.join(PASTA_RELATORIOS, nome_arquivo)
-    pdf.output(caminho)
+    base_nome = f"colombo_{alvo.replace(' ', '_')[:30]}_{ts}"
+    caminho_pdf = os.path.join(PASTA_RELATORIOS, f"{base_nome}.pdf")
+    pdf.output(caminho_pdf)
 
-    return caminho
+    caminho_json = os.path.join(PASTA_RELATORIOS, f"{base_nome}.json")
+    with open(caminho_json, 'w', encoding='utf-8') as f_json:
+        json.dump(resultados, f_json, indent=4, ensure_ascii=False)
+
+    caminho_csv = os.path.join(PASTA_RELATORIOS, f"{base_nome}.csv")
+    with open(caminho_csv, 'w', encoding='utf-8', newline='') as f_csv:
+        writer = csv.writer(f_csv)
+        writer.writerow(["Ferramenta", "Output RAW"])
+        for r in resultados:
+            writer.writerow([r.get("name", "N/A"), r.get("output", "")])
+
+    return caminho_pdf

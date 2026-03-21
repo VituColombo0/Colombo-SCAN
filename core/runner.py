@@ -4,6 +4,15 @@ import tempfile
 import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class EnvWrapper:
+    def __getattr__(self, name):
+        return os.environ.get(name, "")
+
+env_vars = EnvWrapper()
 
 def is_url(texto: str) -> bool:
     return str(texto).startswith("http://") or str(texto).startswith("https://")
@@ -41,7 +50,7 @@ def _executar_um(plugin: dict, inputs: dict) -> dict:
             inputs_tratados[k] = v
 
     try:
-        cmd_final = cmd_base.format(**inputs_tratados)
+        cmd_final = cmd_base.format(env=env_vars, **inputs_tratados)
     except KeyError as e:
         return {"name": plugin.get("name"), "output": f"erro no yaml: variavel {e} faltando"}
 
