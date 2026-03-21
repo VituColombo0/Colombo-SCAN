@@ -1,0 +1,9 @@
+name: TikTok OEmbed
+category: 💬 Redes Sociais
+description: TikTok OEmbed plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://www.tiktok.com/@{alvo}' -A Mozilla | grep -o 'followerCount[^,]+'
+inputs:
+- id: alvo
+  prompt: 'Username do TikTok:'

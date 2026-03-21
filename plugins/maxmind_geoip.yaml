@@ -1,0 +1,9 @@
+name: MaxMind GeoIP
+category: 🌍 Geolocalização
+description: MaxMind GeoIP plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://geolocation-db.com/json/{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Endereço IP:'

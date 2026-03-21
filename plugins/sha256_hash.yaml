@@ -1,0 +1,9 @@
+name: SHA256 Hash
+category: 📄 Documentos e Arquivos
+description: SHA256 Hash plugin
+type: docker
+image: alpine
+command: sh -c 'sha256sum {alvo}'
+inputs:
+- id: alvo
+  prompt: 'Caminho do arquivo:'

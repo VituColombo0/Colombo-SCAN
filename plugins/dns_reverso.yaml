@@ -1,0 +1,9 @@
+name: DNS Reverso
+category: 🌍 Geolocalização
+description: DNS Reverso plugin
+type: docker
+image: alpine
+command: sh -c 'apk add -q bind-tools && host {alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP ou domínio:'

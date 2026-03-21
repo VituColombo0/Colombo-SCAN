@@ -1,0 +1,9 @@
+name: Photon
+category: 👤 Identidades e Usernames
+description: Photon plugin
+type: docker
+image: secsi/photon
+command: -u {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Photon:'

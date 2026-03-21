@@ -1,0 +1,9 @@
+name: GHunt Google
+category: 👤 Identidades e Usernames
+description: GHunt Google plugin
+type: docker
+image: mxrch/ghunt
+command: email {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para GHunt Google:'

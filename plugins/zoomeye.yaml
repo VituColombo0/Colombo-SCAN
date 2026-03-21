@@ -1,0 +1,9 @@
+name: zoomeye
+category: 💻 IoT e Dispositivos
+description: Busca informações de ciberespaço e infraestrutura no ZoomEye.
+command: curl -s 'https://api.zoomeye.org/host/search?query={alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP ou query alvo:'
+timeout: 40
+safe: true

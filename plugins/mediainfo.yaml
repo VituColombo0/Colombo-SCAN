@@ -1,0 +1,9 @@
+name: MediaInfo
+category: 🎙️ Áudio e Vídeo Forense
+description: MediaInfo plugin
+type: docker
+image: jlesage/mediainfo
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Caminho do arquivo de mídia:'

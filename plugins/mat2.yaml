@@ -1,0 +1,9 @@
+name: Mat2
+category: 🖼️ Análise de Imagens
+description: Mat2 plugin
+type: docker
+image: secsi/mat2
+command: show {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Mat2:'

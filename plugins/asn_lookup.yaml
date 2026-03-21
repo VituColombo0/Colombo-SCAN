@@ -1,0 +1,9 @@
+name: ASN Lookup
+category: 🌍 Geolocalização
+description: ASN Lookup plugin
+type: docker
+image: curlimages/curl
+command: -s https://api.bgpview.io/search?query_term={alvo}
+inputs:
+- id: alvo
+  prompt: 'ASN ou IP:'

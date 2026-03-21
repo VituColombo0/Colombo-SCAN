@@ -1,0 +1,9 @@
+name: spiderfoot
+category: 🌐 Redes e IPs
+description: Plataforma OSINT massiva automatizada (+100 fontes).
+command: docker run --rm smicallef/spiderfoot -s {alvo} -q
+inputs:
+- id: alvo
+  prompt: 'Alvo (IP, domínio, email):'
+timeout: 120
+safe: true

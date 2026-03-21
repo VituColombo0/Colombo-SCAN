@@ -1,0 +1,9 @@
+name: Base64 Decoder
+category: 🖼️ Análise de Imagens
+description: Base64 Decoder plugin
+type: docker
+image: alpine
+command: sh -c 'base64 -d {alvo} 2>/dev/null | head -c 200'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Base64 Decoder:'

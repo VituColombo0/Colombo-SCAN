@@ -1,0 +1,9 @@
+name: Ahmia Onion Search
+category: 🌑 Dark Web / Onion
+description: Ahmia Onion Search plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://ahmia.fi/search/?q={alvo}'
+inputs:
+- id: alvo
+  prompt: 'Termo de busca:'

@@ -1,0 +1,9 @@
+name: Strings Doc
+category: 📄 Documentos e Arquivos
+description: Strings Doc plugin
+type: docker
+image: alpine
+command: strings {alvo}
+inputs:
+- id: alvo
+  prompt: 'Caminho do arquivo:'

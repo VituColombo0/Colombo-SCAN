@@ -1,0 +1,9 @@
+name: Instagram OEmbed
+category: 💬 Redes Sociais
+description: Instagram OEmbed plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://www.instagram.com/{alvo}/?__a=1' -A Mozilla
+inputs:
+- id: alvo
+  prompt: 'Username do Instagram:'

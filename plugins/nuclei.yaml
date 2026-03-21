@@ -1,0 +1,9 @@
+name: Nuclei
+category: 🌐 Redes e IPs
+description: Nuclei plugin
+type: docker
+image: projectdiscovery/nuclei
+command: -u {alvo} -silent
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Nuclei:'

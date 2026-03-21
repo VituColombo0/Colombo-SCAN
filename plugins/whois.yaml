@@ -1,0 +1,9 @@
+name: Whois
+category: 🌐 Redes e IPs
+description: Whois plugin
+type: docker
+image: bennetimo/whois
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Whois:'

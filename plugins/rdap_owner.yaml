@@ -1,0 +1,9 @@
+name: RDAP Owner
+category: 🌍 Geolocalização
+description: RDAP Owner plugin
+type: docker
+image: curlimages/curl
+command: -s https://rdap.org/ip/{alvo}
+inputs:
+- id: alvo
+  prompt: 'IP:'

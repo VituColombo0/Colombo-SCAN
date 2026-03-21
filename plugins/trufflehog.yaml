@@ -1,0 +1,9 @@
+name: TruffleHog (Caçador de Senhas)
+category: "🔐 Vazamentos e Senhas"
+description: Analisa o histórico profundo de um repositório GitHub procurando chaves de API, senhas vazadas e credenciais reais
+type: docker
+image: trufflesecurity/trufflehog
+command: "github --repo {url}"
+inputs:
+  - id: url
+    prompt: "Link do repositório no Github para vasculhar vazamentos (ex: https://github.com/trufflesecurity/test_keys):"

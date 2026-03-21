@@ -1,0 +1,9 @@
+name: MISP Feed Check
+category: 📡 Shodan / Dispositivos IoT
+description: MISP Feed Check plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://otx.alienvault.com/api/v1/indicators/IPv4/{alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP:'

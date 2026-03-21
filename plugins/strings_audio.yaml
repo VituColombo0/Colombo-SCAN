@@ -1,0 +1,9 @@
+name: Strings Audio
+category: 🎙️ Áudio e Vídeo Forense
+description: Strings Audio plugin
+type: docker
+image: alpine
+command: strings {alvo} | head -50
+inputs:
+- id: alvo
+  prompt: 'Caminho do arquivo:'

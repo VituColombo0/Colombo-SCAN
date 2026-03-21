@@ -1,0 +1,9 @@
+name: brasilapi-tabela-fipe
+category: 🚗 Veículos e Placas
+description: Busca valor e informações FIPE de uma placa indiretamente (se db tiver).
+command: curl -s 'https://brasilapi.com.br/api/fipe/preco/v1/{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Código FIPE ou Placa:'
+timeout: 30
+safe: true

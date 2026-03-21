@@ -1,0 +1,9 @@
+name: Imagem GPS via exif
+category: 🔍 Busca Reversa de Imagem
+description: Imagem GPS via exif plugin
+type: docker
+image: v4tech/exiftool
+command: -GPSLatitude -GPSLongitude -n {alvo}
+inputs:
+- id: alvo
+  prompt: 'Caminho local ou URL da foto:'

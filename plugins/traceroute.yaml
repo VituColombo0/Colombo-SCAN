@@ -1,0 +1,9 @@
+name: Traceroute
+category: 🌍 Geolocalização
+description: Traceroute plugin
+type: docker
+image: alpine
+command: sh -c 'apk add -q traceroute && traceroute -m 15 {alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP ou domínio:'

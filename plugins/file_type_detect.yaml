@@ -1,0 +1,9 @@
+name: File Type Detect
+category: 📄 Documentos e Arquivos
+description: File Type Detect plugin
+type: docker
+image: alpine
+command: file {alvo}
+inputs:
+- id: alvo
+  prompt: 'Caminho:'

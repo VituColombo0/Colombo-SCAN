@@ -1,0 +1,9 @@
+name: ExifTool
+category: 🖼️ Análise de Imagens
+description: ExifTool plugin
+type: docker
+image: v4tech/exiftool
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para ExifTool:'

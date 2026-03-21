@@ -1,0 +1,9 @@
+name: Steghide
+category: 🖼️ Análise de Imagens
+description: Steghide plugin
+type: docker
+image: hpsj/steghide
+command: info {alvo} < /dev/null
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Steghide:'

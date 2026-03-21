@@ -1,0 +1,9 @@
+name: BTC Transactions
+category: 💰 Rastreio de Criptomoedas
+description: BTC Transactions plugin
+type: docker
+image: curlimages/curl
+command: -s https://blockchain.info/address/{alvo}
+inputs:
+- id: alvo
+  prompt: 'Endereço Bitcoin:'

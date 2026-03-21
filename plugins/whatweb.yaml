@@ -1,0 +1,9 @@
+name: WhatWeb
+category: 🌐 Redes e IPs
+description: WhatWeb plugin
+type: docker
+image: secsi/whatweb
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para WhatWeb:'

@@ -1,0 +1,9 @@
+name: GitLeaks Local
+category: 🔐 Vazamentos Profundos
+description: GitLeaks Local plugin
+type: docker
+image: zricethezav/gitleaks
+command: detect --source {alvo} -v
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para GitLeaks Local:'

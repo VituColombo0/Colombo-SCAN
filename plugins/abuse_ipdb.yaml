@@ -1,0 +1,9 @@
+name: Abuse IPDB
+category: 🌍 Geolocalização
+description: Abuse IPDB plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://api.abuseipdb.com/api/v2/check?ipAddress={alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP suspeito:'

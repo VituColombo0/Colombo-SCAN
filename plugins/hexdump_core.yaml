@@ -1,0 +1,9 @@
+name: HexDump Core
+category: 🖼️ Análise de Imagens
+description: HexDump Core plugin
+type: docker
+image: alpine
+command: sh -c 'hexdump -C {alvo} | head -n 50'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para HexDump Core:'

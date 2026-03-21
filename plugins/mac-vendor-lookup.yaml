@@ -1,0 +1,9 @@
+name: mac-vendor-lookup
+category: 💻 IoT e Dispositivos
+description: Descobre o fabricante de um dispositivo baseado no endereço MAC.
+command: curl -s 'https://api.macvendors.com/{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Endereço MAC alvo (ex: 00:1A:2B...):'
+timeout: 20
+safe: true

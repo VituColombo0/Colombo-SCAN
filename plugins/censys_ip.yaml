@@ -1,0 +1,9 @@
+name: Censys IP
+category: 📡 Shodan / Dispositivos IoT
+description: Censys IP plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://search.censys.io/api/v1/view/ipv4/{alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP:'

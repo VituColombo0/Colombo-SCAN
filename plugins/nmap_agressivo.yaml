@@ -1,0 +1,9 @@
+name: Nmap Agressivo
+category: 🌐 Redes e IPs
+description: Nmap Agressivo plugin
+type: docker
+image: instrumentisto/nmap
+command: -A -T4 {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Nmap Agressivo:'

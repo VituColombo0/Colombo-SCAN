@@ -1,0 +1,9 @@
+name: Telegram Channel
+category: 💬 Redes Sociais
+description: Telegram Channel plugin
+type: docker
+image: curlimages/curl
+command: -sL 'https://t.me/{alvo}' | grep -o 'members[^<]+'
+inputs:
+- id: alvo
+  prompt: 'Username do canal Telegram:'

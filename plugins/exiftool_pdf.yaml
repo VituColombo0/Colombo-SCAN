@@ -1,0 +1,9 @@
+name: ExifTool PDF
+category: 📄 Documentos e Arquivos
+description: ExifTool PDF plugin
+type: docker
+image: v4tech/exiftool
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Caminho do PDF ou URL:'

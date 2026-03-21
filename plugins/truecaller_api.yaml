@@ -1,0 +1,9 @@
+name: Truecaller API
+category: 📱 Inteligência de Telefones
+description: Truecaller API plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://api.truecaller.com/v1.0/search?q={alvo}'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Truecaller API:'

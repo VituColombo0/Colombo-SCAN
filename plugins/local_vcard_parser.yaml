@@ -1,0 +1,9 @@
+name: Local Vcard Parser
+category: 📱 Inteligência de Telefones
+description: Local Vcard Parser plugin
+type: docker
+image: alpine
+command: sh -c 'grep -i "{alvo}" /home/*.vcf 2>/dev/null || echo "Sem vCard"'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Local Vcard Parser:'

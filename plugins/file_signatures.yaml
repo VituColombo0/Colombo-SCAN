@@ -1,0 +1,9 @@
+name: File Signatures
+category: 🖼️ Análise de Imagens
+description: File Signatures plugin
+type: docker
+image: alpine
+command: file {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para File Signatures:'

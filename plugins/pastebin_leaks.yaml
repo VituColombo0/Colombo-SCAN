@@ -1,0 +1,10 @@
+name: Pastebin Leaks
+category: 🔐 Vazamentos Profundos
+description: Pastebin Leaks plugin
+type: docker
+image: alpine
+command: sh -c 'wget -qO- "https://html.duckduckgo.com/html/?q=site:pastebin.com+\"{alvo}\""
+  | grep -o "pastebin.com/.*"'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Pastebin Leaks:'

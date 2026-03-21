@@ -1,0 +1,9 @@
+name: blackbird
+category: 👤 Identidades e Usernames
+description: Busca rápida e moderna de contas por username em 130 sites.
+command: docker run --rm p1ngul1n0/blackbird -u {alvo}
+inputs:
+- id: alvo
+  prompt: 'Username alvo:'
+timeout: 60
+safe: true

@@ -1,0 +1,10 @@
+name: GitRecon
+category: 👤 Identidades e Usernames
+description: GitRecon plugin
+type: docker
+image: alpine
+command: sh -c 'wget -qO- https://api.github.com/users/{alvo}/events/public | grep
+  -o repo'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para GitRecon:'

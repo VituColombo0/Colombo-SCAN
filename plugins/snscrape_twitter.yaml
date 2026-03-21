@@ -1,0 +1,9 @@
+name: snscrape Twitter
+category: 💬 Redes Sociais
+description: snscrape Twitter plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://nitter.net/{alvo}/rss'
+inputs:
+- id: alvo
+  prompt: 'Username do Twitter/X:'

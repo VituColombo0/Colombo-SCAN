@@ -1,0 +1,9 @@
+name: Naabu
+category: 🌐 Redes e IPs
+description: Naabu plugin
+type: docker
+image: projectdiscovery/naabu
+command: -host {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Naabu:'

@@ -1,0 +1,10 @@
+name: Yandex Images curl
+category: 🔍 Busca Reversa de Imagem
+description: Yandex Images curl plugin
+type: docker
+image: curlimages/curl
+command: -sL 'https://yandex.com/images/search?url={alvo}&rpt=imageview' | grep -o
+  'Found [0-9]* sites'
+inputs:
+- id: alvo
+  prompt: 'Link direto da imagem:'

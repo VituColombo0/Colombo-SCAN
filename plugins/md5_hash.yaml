@@ -1,0 +1,9 @@
+name: MD5 Hash
+category: 📄 Documentos e Arquivos
+description: MD5 Hash plugin
+type: docker
+image: alpine
+command: sh -c 'md5sum {alvo}'
+inputs:
+- id: alvo
+  prompt: 'Caminho do arquivo:'

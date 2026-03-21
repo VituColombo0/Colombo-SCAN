@@ -1,0 +1,9 @@
+name: ffprobe Metadados
+category: 🎙️ Áudio e Vídeo Forense
+description: ffprobe Metadados plugin
+type: docker
+image: jrottenberg/ffmpeg
+command: sh -c 'ffprobe -v quiet -print_format json -show_format -show_streams {alvo}'
+inputs:
+- id: alvo
+  prompt: 'Caminho ou URL do vídeo/áudio:'

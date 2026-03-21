@@ -1,0 +1,9 @@
+name: ImageMagick Verbose
+category: 🖼️ Análise de Imagens
+description: ImageMagick Verbose plugin
+type: docker
+image: dpokidov/imagemagick
+command: identify -verbose {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para ImageMagick Verbose:'

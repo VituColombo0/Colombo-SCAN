@@ -1,0 +1,9 @@
+name: BGP Prefix
+category: 🌍 Geolocalização
+description: BGP Prefix plugin
+type: docker
+image: curlimages/curl
+command: -s https://api.bgpview.io/ip/{alvo}
+inputs:
+- id: alvo
+  prompt: 'IP:'

@@ -1,0 +1,9 @@
+name: Dirb
+category: 🌐 Redes e IPs
+description: Dirb plugin
+type: docker
+image: secsi/dirb
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Dirb:'

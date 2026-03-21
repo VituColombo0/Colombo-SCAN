@@ -1,0 +1,9 @@
+name: BinaryEdge
+category: 📡 Shodan / Dispositivos IoT
+description: BinaryEdge plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://app.binaryedge.io/services/query?query={alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP:'

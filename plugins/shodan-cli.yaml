@@ -1,0 +1,9 @@
+name: shodan-cli
+category: 💻 IoT e Dispositivos
+description: Busca o alvo no Shodan (o motor de busca para a Internet das Coisas).
+command: curl -s 'https://internetdb.shodan.io/{alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP ou domínio alvo:'
+timeout: 30
+safe: true

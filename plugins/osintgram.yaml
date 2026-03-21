@@ -1,0 +1,9 @@
+name: OsintGram
+category: 👤 Identidades e Usernames
+description: OsintGram plugin
+type: docker
+image: secsi/osintgram
+command: '{alvo} --info'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para OsintGram:'

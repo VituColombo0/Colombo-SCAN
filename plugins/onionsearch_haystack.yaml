@@ -1,0 +1,9 @@
+name: OnionSearch Haystack
+category: 🌑 Dark Web / Onion
+description: OnionSearch Haystack plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://haystack.mobi/search?q={alvo}'
+inputs:
+- id: alvo
+  prompt: 'Termo:'

@@ -1,0 +1,9 @@
+name: WPScan
+category: 🌐 Redes e IPs
+description: Invade metadados de sites WordPress para listar Admins
+type: docker
+image: wpscanteam/wpscan
+command: --url {alvo} --enumerate u
+inputs:
+- id: alvo
+  prompt: 'URL do site (WordPress):'

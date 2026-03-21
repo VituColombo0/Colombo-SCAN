@@ -1,0 +1,9 @@
+name: ETH Address Etherscan
+category: 💰 Rastreio de Criptomoedas
+description: ETH Address Etherscan plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://api.etherscan.io/api?module=account&action=balance&address={alvo}&tag=latest'
+inputs:
+- id: alvo
+  prompt: 'Endereço ETH (0x...):'

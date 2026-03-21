@@ -1,0 +1,9 @@
+name: HTTPX Status
+category: 🔐 Vazamentos Profundos
+description: HTTPX Status plugin
+type: docker
+image: projectdiscovery/httpx
+command: -u {alvo} -sc -title
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para HTTPX Status:'

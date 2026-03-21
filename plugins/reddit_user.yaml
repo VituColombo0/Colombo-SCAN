@@ -1,0 +1,9 @@
+name: Reddit User
+category: 💬 Redes Sociais
+description: Reddit User plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://www.reddit.com/user/{alvo}/about.json' -A Mozilla
+inputs:
+- id: alvo
+  prompt: 'Username do Reddit:'

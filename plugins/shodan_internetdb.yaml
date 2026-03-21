@@ -1,0 +1,9 @@
+name: Shodan InternetDB
+category: 🌍 Geolocalização
+description: Shodan InternetDB plugin
+type: docker
+image: curlimages/curl
+command: -s https://internetdb.shodan.io/{alvo}
+inputs:
+- id: alvo
+  prompt: 'IP:'

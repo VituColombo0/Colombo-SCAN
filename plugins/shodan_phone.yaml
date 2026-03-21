@@ -1,0 +1,9 @@
+name: Shodan Phone
+category: 📱 Inteligência de Telefones
+description: Shodan Phone plugin
+type: docker
+image: curlimages/curl
+command: -s "https://internetdb.shodan.io/search?query={alvo}"
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Shodan Phone:'

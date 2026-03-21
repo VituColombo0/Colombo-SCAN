@@ -1,0 +1,9 @@
+name: Buster
+category: 📧 Análise de Emails
+description: Buster plugin
+type: docker
+image: secsi/buster
+command: -e {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Buster:'

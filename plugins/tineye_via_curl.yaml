@@ -1,0 +1,9 @@
+name: TinEye via curl
+category: 🔍 Busca Reversa de Imagem
+description: TinEye via curl plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://tineye.com/search?url={alvo}'
+inputs:
+- id: alvo
+  prompt: 'Link direto da imagem (https://...):'

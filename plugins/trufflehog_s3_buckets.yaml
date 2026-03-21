@@ -1,0 +1,9 @@
+name: TruffleHog (S3 Buckets)
+category: 🔐 Vazamentos Profundos
+description: Procura por arquivos confidenciais abertos ao público em Amazon S3
+type: docker
+image: trufflesecurity/trufflehog
+command: s3 --bucket {alvo}
+inputs:
+- id: alvo
+  prompt: 'Nome do bucket S3 da empresa:'

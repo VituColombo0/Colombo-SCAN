@@ -1,0 +1,9 @@
+name: GitLeaks
+category: 🔐 Vazamentos Profundos
+description: Detecta hardcoded secrets se o alvo for caminho local clonado
+type: docker
+image: zricethezav/gitleaks
+command: detect --source {alvo} -v
+inputs:
+- id: alvo
+  prompt: 'Caminho local da pasta clonada:'

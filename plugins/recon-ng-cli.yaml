@@ -1,0 +1,9 @@
+name: recon-ng-cli
+category: 🌐 Redes e IPs
+description: Framework de reconhecimento modular completo.
+command: docker run --rm mclarkson/recon-ng -C 'add domains {alvo}; run'
+inputs:
+- id: alvo
+  prompt: 'Domínio alvo:'
+timeout: 90
+safe: true

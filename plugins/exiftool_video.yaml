@@ -1,0 +1,9 @@
+name: ExifTool Video
+category: 🎙️ Áudio e Vídeo Forense
+description: ExifTool Video plugin
+type: docker
+image: v4tech/exiftool
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Caminho ou URL do vídeo/foto:'

@@ -1,0 +1,9 @@
+name: vin-decoder
+category: 🚗 Veículos e Placas
+description: Consulta internacional de Chassis (VIN).
+command: curl -s 'https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/{alvo}?format=json'
+inputs:
+- id: alvo
+  prompt: 'CHASSI (VIN) do veículo:'
+timeout: 30
+safe: true

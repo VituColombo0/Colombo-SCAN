@@ -1,0 +1,9 @@
+name: Nikto
+category: 🌐 Redes e IPs
+description: Nikto plugin
+type: docker
+image: secsi/nikto
+command: -h {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Nikto:'

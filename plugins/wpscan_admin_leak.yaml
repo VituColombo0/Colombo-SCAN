@@ -1,0 +1,9 @@
+name: WPScan Admin Leak
+category: 🔐 Vazamentos Profundos
+description: WPScan Admin Leak plugin
+type: docker
+image: wpscanteam/wpscan
+command: --url {alvo} -e u,vp
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para WPScan Admin Leak:'

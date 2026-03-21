@@ -1,0 +1,9 @@
+name: Maigret
+category: 👤 Identidades e Usernames
+description: Maigret plugin
+type: docker
+image: soxoj/maigret
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Maigret:'

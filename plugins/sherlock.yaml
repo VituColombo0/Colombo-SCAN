@@ -1,0 +1,9 @@
+name: Sherlock
+category: 👤 Identidades e Usernames
+description: Sherlock plugin
+type: docker
+image: sherlock/sherlock
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Sherlock:'

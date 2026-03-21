@@ -1,0 +1,9 @@
+name: ghunt
+category: 📧 Análise de Emails
+description: OSINT focado em contas do Google (Fotos, Maps, YouTube).
+command: docker run --rm -it mxrch/ghunt email {alvo}
+inputs:
+- id: alvo
+  prompt: 'Email alvo:'
+timeout: 60
+safe: true

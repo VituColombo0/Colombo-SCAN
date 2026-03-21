@@ -1,0 +1,9 @@
+name: BTC Address Info
+category: 💰 Rastreio de Criptomoedas
+description: BTC Address Info plugin
+type: docker
+image: curlimages/curl
+command: -s https://blockchain.info/rawaddr/{alvo}
+inputs:
+- id: alvo
+  prompt: 'Endereço Bitcoin (1xxx ou 3xxx):'

@@ -1,0 +1,9 @@
+name: Nmap Rapido
+category: 🌐 Redes e IPs
+description: Nmap Rapido plugin
+type: docker
+image: instrumentisto/nmap
+command: -F {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Nmap Rapido:'

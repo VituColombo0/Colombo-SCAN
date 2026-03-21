@@ -1,0 +1,9 @@
+name: receitaws
+category: 🏢 Corporate & CNPJ
+description: Busca detalhada CNPJ na Receita Federal (Brasil).
+command: curl -s 'https://receitaws.com.br/v1/cnpj/{alvo}' | jq '.'
+inputs:
+- id: alvo
+  prompt: 'CNPJ alvo (apenas números):'
+timeout: 30
+safe: true

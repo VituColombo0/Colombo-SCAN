@@ -1,0 +1,9 @@
+name: DDI Parser
+category: 📱 Inteligência de Telefones
+description: DDI Parser plugin
+type: docker
+image: alpine
+command: sh -c 'echo "Limpando telefone:" && echo {alvo} | sed -E "s/[^0-9]//g"'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para DDI Parser:'

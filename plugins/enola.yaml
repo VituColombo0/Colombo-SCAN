@@ -1,0 +1,9 @@
+name: enola
+category: 👤 Identidades e Usernames
+description: OSINT social rápido usando web scraping e APIs.
+command: docker run --rm enola-osint {alvo}
+inputs:
+- id: alvo
+  prompt: 'Username alvo:'
+timeout: 60
+safe: true

@@ -1,0 +1,9 @@
+name: HexDump Cabeçalho
+category: 📄 Documentos e Arquivos
+description: HexDump Cabeçalho plugin
+type: docker
+image: alpine
+command: sh -c 'hexdump -C {alvo} | head -n 20'
+inputs:
+- id: alvo
+  prompt: 'Caminho:'

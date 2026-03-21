@@ -1,0 +1,9 @@
+name: Hunter Pattern
+category: 📧 Análise de Emails
+description: Hunter Pattern plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://api.hunter.io/v2/domain-search?domain={alvo}'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Hunter Pattern:'

@@ -1,0 +1,9 @@
+name: Nmap (PortScan Ágil)
+category: "🌐 Redes e IPs"
+description: Vasculha as portas abertas do alvo e tenta descobrir portas ocultas da rede.
+type: docker
+image: instrumentisto/nmap
+command: "-F {alvo}"
+inputs:
+  - id: alvo
+    prompt: "Qual o IP ou domínio para rodar o scan de portas e infiltração?"

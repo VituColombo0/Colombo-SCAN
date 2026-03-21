@@ -1,0 +1,9 @@
+name: leaklooker
+category: 🔐 Vazamentos Profundos
+description: Verifica instâncias expostas e senhas padrão no Shodan, Firebase, etc.
+command: docker run --rm xilox/leaklooker -k {alvo}
+inputs:
+- id: alvo
+  prompt: 'Palavra-chave/Alvo:'
+timeout: 90
+safe: true

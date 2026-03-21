@@ -1,0 +1,9 @@
+name: Blockchair BTC
+category: 💰 Rastreio de Criptomoedas
+description: Blockchair BTC plugin
+type: docker
+image: curlimages/curl
+command: -s https://api.blockchair.com/bitcoin/dashboards/address/{alvo}
+inputs:
+- id: alvo
+  prompt: 'Endereço Bitcoin:'

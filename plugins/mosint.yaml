@@ -1,0 +1,10 @@
+name: mosint
+category: 📧 Análise de Emails
+description: Ferramenta Go automatizada para OSINT em e-mails (brechas, domínios,
+  etc).
+command: docker run --rm alpkeskin/mosint {alvo}
+inputs:
+- id: alvo
+  prompt: 'Email alvo:'
+timeout: 60
+safe: true

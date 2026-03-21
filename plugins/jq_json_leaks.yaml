@@ -1,0 +1,9 @@
+name: Jq Json Leaks
+category: 🔐 Vazamentos Profundos
+description: Jq Json Leaks plugin
+type: docker
+image: imega/jq
+command: '''.[] | select(has("{alvo}"))'' /tmp/alvo.tmp'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Jq Json Leaks:'

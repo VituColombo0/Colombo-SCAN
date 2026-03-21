@@ -1,0 +1,9 @@
+name: LTC Lookup
+category: 💰 Rastreio de Criptomoedas
+description: LTC Lookup plugin
+type: docker
+image: curlimages/curl
+command: -s https://api.blockchair.com/litecoin/dashboards/address/{alvo}
+inputs:
+- id: alvo
+  prompt: 'Endereço Litecoin (ltc1...):'

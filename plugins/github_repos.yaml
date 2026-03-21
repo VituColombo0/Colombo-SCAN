@@ -1,0 +1,9 @@
+name: GitHub Repos
+category: 💬 Redes Sociais
+description: GitHub Repos plugin
+type: docker
+image: curlimages/curl
+command: -s https://api.github.com/users/{alvo}/repos
+inputs:
+- id: alvo
+  prompt: 'Username do GitHub:'

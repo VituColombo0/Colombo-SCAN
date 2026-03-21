@@ -1,0 +1,9 @@
+name: ETH Transactions
+category: 💰 Rastreio de Criptomoedas
+description: ETH Transactions plugin
+type: docker
+image: curlimages/curl
+command: -s 'https://api.etherscan.io/api?module=account&action=txlist&address={alvo}&sort=desc'
+inputs:
+- id: alvo
+  prompt: 'Endereço ETH:'

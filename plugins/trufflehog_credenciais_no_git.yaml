@@ -1,0 +1,9 @@
+name: TruffleHog (Credenciais no Git)
+category: 🔐 Vazamentos Profundos
+description: Lê todo histórico de Commits pra roubar Tokens e chaves AWS
+type: docker
+image: trufflesecurity/trufflehog
+command: github --repo {alvo}
+inputs:
+- id: alvo
+  prompt: 'Link do repo no Github:'

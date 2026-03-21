@@ -1,0 +1,10 @@
+name: WhatsApp Check
+category: 📱 Inteligência de Telefones
+description: WhatsApp Check plugin
+type: docker
+image: alpine
+command: sh -c 'wget -qO- "https://wa.me/{alvo}" | grep -Eo "[A-Za-z0-9 ]+ usa o WhatsApp"
+  || echo "Sem Whats"'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para WhatsApp Check:'

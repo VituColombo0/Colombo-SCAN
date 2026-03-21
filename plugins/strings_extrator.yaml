@@ -1,0 +1,9 @@
+name: Strings Extrator
+category: 🖼️ Análise de Imagens
+description: Strings Extrator plugin
+type: docker
+image: alpine
+command: strings {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Strings Extrator:'

@@ -1,0 +1,9 @@
+name: Amass
+category: 🌐 Redes e IPs
+description: Amass plugin
+type: docker
+image: caffix/amass
+command: enum -d {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Amass:'

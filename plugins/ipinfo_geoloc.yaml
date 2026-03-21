@@ -1,0 +1,9 @@
+name: IPInfo Geoloc
+category: 🌍 Geolocalização
+description: IPInfo Geoloc plugin
+type: docker
+image: curlimages/curl
+command: -s https://ipinfo.io/{alvo}/json
+inputs:
+- id: alvo
+  prompt: 'IP ou domínio:'

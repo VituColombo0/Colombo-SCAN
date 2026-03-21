@@ -1,0 +1,9 @@
+name: dnsdumpster-cli
+category: 🌐 Redes e IPs
+description: Pesquisa massiva de DNS e descobrimento de hosts.
+command: curl -s 'https://api.hackertarget.com/hostsearch/?q={alvo}'
+inputs:
+- id: alvo
+  prompt: 'Domínio ou IP alvo:'
+timeout: 45
+safe: true

@@ -1,0 +1,9 @@
+name: PhoneInfoga
+category: 📱 Inteligência de Telefones
+description: PhoneInfoga plugin
+type: docker
+image: sundowndev/phoneinfoga
+command: scan -n {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para PhoneInfoga:'

@@ -1,0 +1,9 @@
+name: TheHarvester
+category: 📧 Análise de Emails
+description: TheHarvester plugin
+type: docker
+image: secsi/theharvester
+command: -d {alvo} -b all
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para TheHarvester:'

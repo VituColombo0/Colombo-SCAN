@@ -1,0 +1,9 @@
+name: SocialAnalyzer
+category: 👤 Identidades e Usernames
+description: SocialAnalyzer plugin
+type: docker
+image: qeeqbox/social-analyzer
+command: --username {alvo}
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para SocialAnalyzer:'

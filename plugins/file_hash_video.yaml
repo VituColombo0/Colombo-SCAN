@@ -1,0 +1,9 @@
+name: File Hash Video
+category: 🎙️ Áudio e Vídeo Forense
+description: File Hash Video plugin
+type: docker
+image: alpine
+command: sh -c 'sha256sum {alvo} && md5sum {alvo}'
+inputs:
+- id: alvo
+  prompt: 'Caminho do arquivo:'

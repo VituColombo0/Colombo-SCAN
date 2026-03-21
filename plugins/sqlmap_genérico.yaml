@@ -1,0 +1,9 @@
+name: SqlMap (Genérico)
+category: 🌐 Redes e IPs
+description: Testa brechas SQL numa API passando parâmetro telefone
+type: docker
+image: sqlmapproject/sqlmap
+command: -u {alvo} --batch
+inputs:
+- id: alvo
+  prompt: 'URL (ex: http://site.com/db?id=1):'

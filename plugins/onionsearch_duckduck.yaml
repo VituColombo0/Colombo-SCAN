@@ -1,0 +1,10 @@
+name: OnionSearch DuckDuck
+category: 🌑 Dark Web / Onion
+description: OnionSearch DuckDuck plugin
+type: docker
+image: alpine
+command: sh -c 'wget -qO- https://html.duckduckgo.com/html/?q=site:.onion+{alvo} |
+  grep -o "[a-z0-9]*\.onion"'
+inputs:
+- id: alvo
+  prompt: 'Termo de busca (ex: nome da pessoa):'

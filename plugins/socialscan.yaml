@@ -1,0 +1,9 @@
+name: socialscan
+category: 👤 Identidades e Usernames
+description: Busca extremamente rápida de usernames e emails em redes sociais.
+command: docker run --rm msoedov/socialscan {alvo}
+inputs:
+- id: alvo
+  prompt: 'Username ou email alvo:'
+timeout: 45
+safe: true

@@ -1,0 +1,9 @@
+name: Crypto OSINT
+category: 💰 Rastreio de Criptomoedas
+description: Crypto OSINT plugin
+type: docker
+image: alpine
+command: 'sh -c ''echo Tipo detectado: && echo {alvo} | grep -oP "^[0-9a-zA-Z]+"'''
+inputs:
+- id: alvo
+  prompt: 'Endereço cripto (BTC/ETH/LTC):'

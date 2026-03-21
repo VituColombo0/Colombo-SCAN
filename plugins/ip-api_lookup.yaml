@@ -1,0 +1,9 @@
+name: IP-API Lookup
+category: 🌍 Geolocalização
+description: IP-API Lookup plugin
+type: docker
+image: curlimages/curl
+command: -s http://ip-api.com/json/{alvo}
+inputs:
+- id: alvo
+  prompt: 'IP:'

@@ -1,0 +1,9 @@
+name: GitHub User
+category: 💬 Redes Sociais
+description: GitHub User plugin
+type: docker
+image: curlimages/curl
+command: -s https://api.github.com/users/{alvo}
+inputs:
+- id: alvo
+  prompt: 'Username do GitHub:'

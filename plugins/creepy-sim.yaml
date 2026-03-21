@@ -1,0 +1,10 @@
+name: creepy-sim
+category: 🌍 Geolocalização
+description: Geolocalização usando tweets geolocalizados e metadados de imagens.
+command: echo 'Simulação Creepy Geo-Intel para {alvo} - Extraindo GEO tags de repositórios
+  conhecidos'
+inputs:
+- id: alvo
+  prompt: 'Username ou link:'
+timeout: 20
+safe: true

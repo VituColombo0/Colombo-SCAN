@@ -1,0 +1,9 @@
+name: Carrier Lookup
+category: 📱 Inteligência de Telefones
+description: Carrier Lookup plugin
+type: docker
+image: alpine
+command: 'sh -c ''echo "Consultando Blocos Anatel para: {alvo}..."'''
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Carrier Lookup:'

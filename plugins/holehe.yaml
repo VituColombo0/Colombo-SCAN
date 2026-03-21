@@ -1,0 +1,9 @@
+name: Holehe
+category: 📧 Análise de Emails
+description: Holehe plugin
+type: docker
+image: megaron/holehe
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para Holehe:'

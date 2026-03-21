@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Colombo - Link Analysis Graph</title>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style>
+  body { background:#0d0d1a; margin:0; font-family: monospace; color: #0ce; }
+  #header { padding:10px 20px; background:#111; border-bottom:1px solid #0ce; }
+  #header h1 { margin:0; font-size:1.2em; color:#0ce; }
+  #network { width:100vw; height:calc(100vh - 50px); }
+</style>
+</head>
+<body>
+<div id="header"><h1>🔗 Colombo Scanner - Link Analysis | Alvo: {alvo}</h1></div>
+<div id="network"></div>
+<script>
+const nodes = new vis.DataSet({nodes});
+const edges = new vis.DataSet({edges});
+const container = document.getElementById('network');
+const data = {{ nodes, edges }};
+const options = {{
+  nodes: {{ font: {{ color: '#0ce' }}, color: {{ border: '#0ce', background: '#1a1a2e', highlight: {{ border:'#fff', background:'#16213e' }} }} }},
+  edges: {{ color: '#0ce44433', arrows: 'to' }},
+  physics: {{ stabilization: {{ iterations: 100 }} }},
+  background: '#0d0d1a'
+}};
+new vis.Network(container, data, options);
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+name: SMTP Enum
+category: 📧 Análise de Emails
+description: SMTP Enum plugin
+type: docker
+image: alpine
+command: sh -c 'apk add nmap >/dev/null && nmap --script smtp-enum-users.nse -p 25
+  {alvo}'
+inputs:
+- id: alvo
+  prompt: 'Digite o alvo para SMTP Enum:'

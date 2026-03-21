@@ -1,0 +1,9 @@
+name: Shodan Host
+category: 📡 Shodan / Dispositivos IoT
+description: Shodan Host plugin
+type: docker
+image: curlimages/curl
+command: -s https://internetdb.shodan.io/{alvo}
+inputs:
+- id: alvo
+  prompt: 'IP ou domínio:'
