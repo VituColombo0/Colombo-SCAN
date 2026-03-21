@@ -11,6 +11,7 @@ from core.smart_scan import filtrar_plugins_smart, detectar_tipo, categorias_rec
 from core.report import gerar_relatorio
 from core.graph import gerar_grafo
 from core.health_check import check_dependencies
+from core.workflow import executar_workflow_recursivo
 
 console = Console()
 check_dependencies()
@@ -90,6 +91,7 @@ def modo_interativo():
             console.print("[red]nenhum yaml encontrado em plugins/.[/red]")
             return
         modos = [
+            questionary.Choice("🔄 Workflow Autônomo (Cadeia de Investigação)", value="workflow"),
             questionary.Choice("🧠 Investigação Inteligente (Auto-Deteção)", value="smart"),
             questionary.Choice("⚡ Varredura Paralela (Massiva/Rápida)", value="parallel"),
             questionary.Choice("🔧 Consulta Manual (Por Categoria/Ferramenta)", value="manual"),
@@ -114,12 +116,23 @@ def modo_interativo():
 
         resultados = []
         alvo = ""
-        if modo in ["smart", "parallel"]:
+        if modo in ["smart", "parallel", "workflow"]:
             alvo = questionary.text("Alvo (email, telefone, username, URL, cripto, arquivo...):").ask()
             if not alvo:
                 continue
 
-            tipo = detectar_tipo(alvo)
+            if modo == "workflow":
+                verbose = questionary.confirm("Ativar Modo Explicativo (Mostrar pensamento do software em tempo real)?", default=True).ask()
+                try:
+                    camadas = int(questionary.text("Quantas camadas de profundidade investigar? (Padrao=2):", default="2").ask())
+                except ValueError:
+                    camadas = 2
+                resultados = executar_workflow_recursivo(alvo, plugins, max_camadas=camadas, verbose=verbose)
+                exibir_resultados(resultados)
+                # jump to reporting section
+                pass
+            else:
+                tipo = detectar_tipo(alvo)
             cats = categorias_recomendadas(alvo)
             console.print(Panel(f"Target: [bold]{alvo}[/bold]\nTipo detectado: [bold yellow]{tipo}[/bold yellow]\nCategorias: [cyan]{', '.join(cats)}[/cyan]", title="Análise Preliminar", border_style="blue"))
 
