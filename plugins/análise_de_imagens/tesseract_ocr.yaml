@@ -1,9 +1,0 @@
-name: Tesseract OCR
-category: 🖼️ Análise de Imagens
-description: Tesseract OCR plugin
-type: docker
-image: jamesbrink/tesseract-ocr
-command: '{alvo} stdout'
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para Tesseract OCR:'

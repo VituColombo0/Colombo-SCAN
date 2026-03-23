@@ -1,9 +1,0 @@
-name: Email2Phone
-category: 📱 Inteligência de Telefones
-description: Email2Phone plugin
-type: docker
-image: martinvigo/email2phonenumber
-command: scrape -e {alvo} -v
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para Email2Phone:'

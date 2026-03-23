@@ -1,9 +1,0 @@
-name: Hubble
-category: 📧 Análise de Emails
-description: Hubble plugin
-type: docker
-image: khast3x/hubble
-command: '{alvo}'
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para Hubble:'

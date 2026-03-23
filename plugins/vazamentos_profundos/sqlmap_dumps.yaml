@@ -1,9 +1,0 @@
-name: SqlMap Dumps
-category: 🔐 Vazamentos Profundos
-description: SqlMap Dumps plugin
-type: docker
-image: sqlmapproject/sqlmap
-command: -u {alvo} --batch --dbs
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para SqlMap Dumps:'

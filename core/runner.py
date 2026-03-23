@@ -59,13 +59,19 @@ def _executar_um(plugin: dict, inputs: dict) -> dict:
     cmd_docker = f"docker run --rm {volumes} {flag_entry} {imagem} {cmd_final}"
 
     try:
-        proc = subprocess.run(cmd_docker, shell=True, capture_output=True, text=True, timeout=120)
+        proc = subprocess.run(cmd_docker, shell=True, capture_output=True, text=True, timeout=300)
+        
+        if proc.returncode == 125:
+            return {"name": plugin.get("name"), "output": "[Falha] Imagem Docker Inativa ou Faltam Arquivos"}
+            
         out = proc.stdout
-        if proc.stderr:
+        # Só exibe stderr se o stdout for nulo e tiver conteúdo (previne poluição)
+        if proc.stderr and not out.strip():
             out += f"\n[stderr]:\n{proc.stderr}"
+            
         return {"name": plugin.get("name"), "output": out.strip()}
     except subprocess.TimeoutExpired:
-        return {"name": plugin.get("name"), "output": "timeout: o plugin demorou mais de 2 minutos"}
+        return {"name": plugin.get("name"), "output": "timeout: a extração demorou mais de 5 minutos"}
     except Exception as e:
         return {"name": plugin.get("name"), "output": f"falha ao subir {imagem}: {e}"}
     finally:

@@ -1,9 +1,0 @@
-name: Mat2 Metadata
-category: 📄 Documentos e Arquivos
-description: Mat2 Metadata plugin
-type: docker
-image: secsi/mat2
-command: show {alvo}
-inputs:
-- id: alvo
-  prompt: 'Caminho do PDF/Word:'

@@ -1,9 +1,0 @@
-name: S3Scanner
-category: 🔐 Vazamentos Profundos
-description: S3Scanner plugin
-type: docker
-image: jakejarvis/s3scanner
-command: '{alvo}'
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para S3Scanner:'

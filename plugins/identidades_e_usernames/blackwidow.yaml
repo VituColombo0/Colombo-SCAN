@@ -1,9 +1,0 @@
-name: BlackWidow
-category: 👤 Identidades e Usernames
-description: BlackWidow plugin
-type: docker
-image: michelin/blackwidow
-command: -d {alvo}
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para BlackWidow:'

@@ -1,9 +1,0 @@
-name: H8Mail Leaks
-category: 📧 Análise de Emails
-description: H8Mail Leaks plugin
-type: docker
-image: shmilylty/h8mail
-command: -t {alvo}
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para H8Mail Leaks:'

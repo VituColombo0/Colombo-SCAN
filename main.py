@@ -28,6 +28,18 @@ def print_banner():
     """
     console.print(Panel.fit(banner, border_style="cyan"))
 
+def exibir_tutorial():
+    info = (
+        "[bold yellow]Como o Colombo Scanner funciona?[/bold yellow]\n\n"
+        " O scanner automatiza dezenas de ferramentas OSINT (Docker). Você possui 2 caminhos principais:\n\n"
+        " 🎯 [bold green]Varredura Direta:[/bold green] Você insere um alvo (IP, email, placa) e o Scanner detecta o tipo, "
+        "recomenda as ferramentas ideais e executa todas de uma vez em paralelo para aquele alvo específico.\n\n"
+        " 🕸️ [bold magenta]Workflow Autônomo (Camadas):[/bold magenta] O modo 'Agente'. Você insere um alvo inicial, e ele faz a "
+        "varredura. O sistema então lê os resultados da [bold]Camada 1[/bold], extrai novos IPs, E-mails e Telefones que encontrar no texto, e "
+        "automaticamente inicia uma nova investigação profunda para essas novas pistas ([bold]Camada 2[/bold]), criando uma rede de inteligência massiva."
+    )
+    console.print(Panel(info, title="📚 Guia Rápido", border_style="yellow"))
+
 def exibir_resultados(resultados: list[dict]):
     """imprime os resultados formatados no terminal"""
     for r in resultados:
@@ -85,15 +97,15 @@ def modo_interativo():
     """loop principal da interface interativa com Dashboard de Modos"""
     while True:
         print_banner()
+        exibir_tutorial()
 
         plugins = load_plugins()
         if not plugins:
             console.print("[red]nenhum yaml encontrado em plugins/.[/red]")
             return
         modos = [
-            questionary.Choice("🔄 Workflow Autônomo (Cadeia de Investigação)", value="workflow"),
-            questionary.Choice("🧠 Investigação Inteligente (Auto-Deteção)", value="smart"),
-            questionary.Choice("⚡ Varredura Paralela (Massiva/Rápida)", value="parallel"),
+            questionary.Choice("🎯 Varredura Direta (Alvo Único / Paralelo)", value="direct"),
+            questionary.Choice("🕸️ Workflow Autônomo (Agente de Camadas Profundas)", value="workflow"),
             questionary.Choice("🔧 Consulta Manual (Por Categoria/Ferramenta)", value="manual"),
             questionary.Choice("📁 Abrir Pasta de Relatórios", value="reports"),
             questionary.Choice("🚪 Sair", value="exit"),
@@ -116,28 +128,56 @@ def modo_interativo():
 
         resultados = []
         alvo = ""
-        if modo in ["smart", "parallel", "workflow"]:
+        if modo in ["direct", "workflow"]:
             alvo = questionary.text("Alvo (email, telefone, username, URL, cripto, arquivo...):").ask()
             if not alvo:
                 continue
 
             if modo == "workflow":
-                verbose = questionary.confirm("Ativar Modo Explicativo (Mostrar pensamento do software em tempo real)?", default=True).ask()
+                console.print(Panel(
+                    "[italic]O Workflow pegará a saída do seu alvo inicial e vai minerar novas informações.\n"
+                    "O número de 'Camadas' define o quão fundo na toca do coelho o scanner deve ir.\n"
+                    "Ex: 2 Camadas = Investiga o alvo, acha um IP, investiga esse IP e para.[/italic]",
+                    border_style="magenta", title="Sobre as Camadas"
+                ))
+                verbose = questionary.confirm("Ativar Modo Explicativo (Mostrar pensamento do agente no terminal)?", default=True).ask()
                 try:
-                    camadas = int(questionary.text("Quantas camadas de profundidade investigar? (Padrao=2):", default="2").ask())
+                    camadas = int(questionary.text("Quantas camadas de profundidade investigar? (Mín 1, Máx 5):", default="2").ask())
                 except ValueError:
                     camadas = 2
                 resultados = executar_workflow_recursivo(alvo, plugins, max_camadas=camadas, verbose=verbose)
                 exibir_resultados(resultados)
-                # jump to reporting section
+                # Pula para a exportacao de logs
                 pass
             else:
                 tipo = detectar_tipo(alvo)
-            cats = categorias_recomendadas(alvo)
-            console.print(Panel(f"Target: [bold]{alvo}[/bold]\nTipo detectado: [bold yellow]{tipo}[/bold yellow]\nCategorias: [cyan]{', '.join(cats)}[/cyan]", title="Análise Preliminar", border_style="blue"))
+                cats = categorias_recomendadas(alvo)
+                console.print(Panel(f"Target: [bold]{alvo}[/bold]\nTipo detectado: [bold yellow]{tipo}[/bold yellow]\nCategorias: [cyan]{', '.join(cats)}[/cyan]", title="Análise Preliminar", border_style="blue"))
 
-            plugins_smart = filtrar_plugins_smart(plugins, alvo)
-            if not plugins_smart:
+                plugins_smart = filtrar_plugins_smart(plugins, alvo)
+                if not plugins_smart:
+                    console.print("[yellow]nenhum plugin encontrado pra esse tipo.[/yellow]")
+                    continue
+                opcoes_ferramentas = [
+                    questionary.Choice(f"{p['name']} - {p.get('description', '')}", value=p, checked=True)
+                    for p in plugins_smart
+                ]
+                
+                plugins_selecionados = questionary.checkbox(
+                    f"Ferramentas recomendadas para '{tipo}':",
+                    choices=opcoes_ferramentas
+                ).ask()
+
+                if not plugins_selecionados:
+                    continue
+
+                inputs = {"alvo": alvo}
+
+                console.print(f"[bold yellow]⚡ Rodando {len(plugins_selecionados)} plugins em paralelo...[/bold yellow]")
+                with console.status("[bold green]aguardando os containers docker para processamento...[/bold green]"):
+                    resultados = run_plugins_paralelo(plugins_selecionados, inputs)
+
+                exibir_resultados(resultados)
                 console.print("[yellow]nenhum plugin encontrado pra esse tipo.[/yellow]")
                 continue
             opcoes_ferramentas = [

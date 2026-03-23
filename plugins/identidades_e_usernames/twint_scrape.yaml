@@ -1,9 +1,0 @@
-name: Twint Scrape
-category: 👤 Identidades e Usernames
-description: Twint Scrape plugin
-type: docker
-image: wint3rmute/twint
-command: -u {alvo}
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para Twint Scrape:'

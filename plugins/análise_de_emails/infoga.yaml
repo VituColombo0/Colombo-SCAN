@@ -1,9 +1,0 @@
-name: Infoga
-category: 📧 Análise de Emails
-description: Infoga plugin
-type: docker
-image: secsi/infoga
-command: -d {alvo} -s all
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para Infoga:'

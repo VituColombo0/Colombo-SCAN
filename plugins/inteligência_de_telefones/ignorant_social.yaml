@@ -1,9 +1,0 @@
-name: Ignorant Social
-category: 📱 Inteligência de Telefones
-description: Ignorant Social plugin
-type: docker
-image: secsi/ignorant
-command: '{alvo}'
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para Ignorant Social:'

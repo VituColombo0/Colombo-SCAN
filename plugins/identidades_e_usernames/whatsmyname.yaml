@@ -1,9 +1,0 @@
-name: WhatsMyName
-category: 👤 Identidades e Usernames
-description: WhatsMyName plugin
-type: docker
-image: secsi/whatsmyname
-command: -u {alvo}
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para WhatsMyName:'

@@ -1,9 +1,0 @@
-name: gallery-dl Downloader
-category: 🔍 Busca Reversa de Imagem
-description: gallery-dl Downloader plugin
-type: docker
-image: jauderho/gallery-dl
-command: '{alvo}'
-inputs:
-- id: alvo
-  prompt: 'URL do perfil/galeria pra baixar:'

@@ -1,9 +1,0 @@
-name: ZAP Web Scan
-category: 🔐 Vazamentos Profundos
-description: ZAP Web Scan plugin
-type: docker
-image: owasp/zap2docker-stable
-command: zap-baseline.py -t {alvo}
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para ZAP Web Scan:'

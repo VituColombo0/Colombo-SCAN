@@ -1,9 +1,0 @@
-name: Binwalk
-category: 🖼️ Análise de Imagens
-description: Binwalk plugin
-type: docker
-image: kurobeats/binwalk
-command: '{alvo}'
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para Binwalk:'
