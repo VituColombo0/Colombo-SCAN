@@ -1,0 +1,9 @@
+name: "Cloud Bucket Leak Detector (Nuclei)"
+description: "Varredura especializada para encontrar Buckets S3 e Cloud Assets abertos."
+category: "🔍 Vazamentos Profundos"
+image: "projectdiscovery/nuclei:latest"
+command: "-target {alvo} -tags s3,bucket,cloud,azure,aws -severity medium,high,critical -silent"
+inputs:
+  - id: "alvo"
+    type: "text"
+    prompt: "Alvo (Domínio ou IP) para busca de Cloud Leaks:"
