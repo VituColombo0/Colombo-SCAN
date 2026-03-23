@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Colombo - Link Analysis Graph</title>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
 <style>
   body { background:#0d0d1a; margin:0; font-family: monospace; color: #0ce; }
   #header { padding:10px 20px; background:#111; border-bottom:1px solid #0ce; }
@@ -19,12 +20,26 @@ const nodes = new vis.DataSet({nodes});
 const edges = new vis.DataSet({edges});
 const container = document.getElementById('network');
 const data = {{ nodes, edges }};
+
+// Defines the custom Maltego-like icon set for OSINT groups
 const options = {{
-  nodes: {{ font: {{ color: '#0ce' }}, color: {{ border: '#0ce', background: '#1a1a2e', highlight: {{ border:'#fff', background:'#16213e' }} }} }},
-  edges: {{ color: '#0ce44433', arrows: 'to' }},
-  physics: {{ stabilization: {{ iterations: 100 }} }},
+  nodes: {{ shape: 'dot', font: {{ color: '#0ce' }} }},
+  groups: {{
+    alvo:    {{ shape: 'icon', icon: {{ face: '"Font Awesome 5 Free"', weight: '900', code: '\uf140', color: '#e74c3c' }}, size: 40 }},
+    email:   {{ shape: 'icon', icon: {{ face: '"Font Awesome 5 Free"', weight: '900', code: '\uf0e0', color: '#3498db' }} }},
+    url:     {{ shape: 'icon', icon: {{ face: '"Font Awesome 5 Free"', weight: '900', code: '\uf0c1', color: '#2ecc71' }} }},
+    ip:      {{ shape: 'icon', icon: {{ face: '"Font Awesome 5 Free"', weight: '900', code: '\uf233', color: '#f39c12' }} }},
+    usuario: {{ shape: 'icon', icon: {{ face: '"Font Awesome 5 Free"', weight: '900', code: '\uf007', color: '#9b59b6' }} }},
+    telefone:{{ shape: 'icon', icon: {{ face: '"Font Awesome 5 Free"', weight: '900', code: '\uf095', color: '#1abc9c' }} }}
+  }},
+  edges: {{ color: '#0ce44433', arrows: 'to', font: {{ color: '#888', size: 10, align: 'horizontal' }} }},
+  physics: {{ forceAtlas2Based: {{ gravitationalConstant: -50, centralGravity: 0.01, springLength: 100, springConstant: 0.08 }}, solver: 'forceAtlas2Based', stabilization: {{ iterations: 150 }} }},
   background: '#0d0d1a'
 }};
+
+// Force Alvo to have the proper group visually
+nodes.update({{id: 0, group: 'alvo'}});
+
 new vis.Network(container, data, options);
 </script>
 </body>

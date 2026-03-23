@@ -39,12 +39,13 @@ def _extrair_nos_arestas(alvo: str, resultados: list[dict]) -> tuple[list, list]
                     continue
                 vistos.add(val)
 
+                # Groups names exactly mapping to visual FA codes on HTML template
                 nos.append({
                     "id": id_no,
                     "label": val[:40],
                     "title": f"Encontrado por: {ferramenta}",
-                    "color": CORES.get(tipo, "#95a5a6"),
-                    "group": tipo
+                    "group": tipo,
+                    "value": 15
                 })
                 arestas.append({"from": 0, "to": id_no, "label": ferramenta[:20]})
                 id_no += 1

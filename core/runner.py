@@ -49,6 +49,14 @@ def _executar_um(plugin: dict, inputs: dict) -> dict:
         else:
             inputs_tratados[k] = v
 
+    import re
+    # 1. API Dependency Validator
+    req_envs = re.findall(r'\{env\.([^}]+)\}', cmd_base)
+    for req in req_envs:
+        val = getattr(env_vars, req, "")
+        if not val:
+            return {"name": plugin.get("name"), "output": f"⚠️ [Ignorado] Chave de API '{req}' ausente no arquivo .env"}
+
     try:
         cmd_final = cmd_base.format(env=env_vars, **inputs_tratados)
     except KeyError as e:
@@ -59,7 +67,8 @@ def _executar_um(plugin: dict, inputs: dict) -> dict:
     cmd_docker = f"docker run --rm {volumes} {flag_entry} {imagem} {cmd_final}"
 
     try:
-        proc = subprocess.run(cmd_docker, shell=True, capture_output=True, text=True, timeout=300)
+        # stdin=subprocess.DEVNULL block interactive prompts that freeze the engine
+        proc = subprocess.run(cmd_docker, shell=True, capture_output=True, text=True, timeout=300, stdin=subprocess.DEVNULL)
         
         if proc.returncode == 125:
             return {"name": plugin.get("name"), "output": "[Falha] Imagem Docker Inativa ou Faltam Arquivos"}
