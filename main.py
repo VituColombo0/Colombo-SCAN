@@ -93,6 +93,164 @@ def modo_silencioso(alvo: str, categoria: str = None, paralelo: bool = True):
     console.print(f"\n[bold green]✅ relatorio: {caminho}[/bold green]")
     return resultados
 
+def processar_exportacoes(alvo, resultados):
+    if not resultados:
+        return
+    opcoes_export = questionary.checkbox(
+        "O que quer exportar?",
+        choices=[
+            questionary.Choice("📄 Relatório PDF", checked=True),
+            questionary.Choice("🔗 Grafo de Links (HTML interativo)", checked=True)
+        ]
+    ).ask()
+
+    if not opcoes_export:
+        return
+
+    if "📄 Relatório PDF" in opcoes_export:
+        caminho = gerar_relatorio(alvo, resultados)
+        console.print(f"\n[bold green]✅ PDF: {caminho}[/bold green]")
+
+    if "🔗 Grafo de Links (HTML interativo)" in opcoes_export:
+        caminho_grafo = gerar_grafo(alvo, resultados)
+        console.print(f"[bold green]✅ Grafo: {caminho_grafo}[/bold green]\n")
+
+def modo_workflow(alvo: str, plugins: list):
+    console.print(Panel(
+        "[italic]O Workflow pegará a saída do seu alvo inicial e vai minerar novas informações.\n"
+        "O número de 'Camadas' define o quão fundo na toca do coelho o scanner deve ir.\n"
+        "Ex: 2 Camadas = Investiga o alvo, acha um IP, investiga esse IP e para.[/italic]",
+        border_style="magenta", title="Sobre as Camadas"
+    ))
+    verbose = questionary.confirm("Ativar Modo Explicativo (Mostrar pensamento do agente no terminal)?", default=True).ask()
+    try:
+        camadas = int(questionary.text("Quantas camadas de profundidade investigar? (Mín 1, Máx 5):", default="2").ask())
+    except ValueError:
+        camadas = 2
+    resultados = executar_workflow_recursivo(alvo, plugins, max_camadas=camadas, verbose=verbose)
+    exibir_resultados(resultados)
+    return resultados
+
+def modo_direto(alvo: str, plugins: list):
+    tipo = detectar_tipo(alvo)
+    cats = categorias_recomendadas(alvo)
+    console.print(Panel(f"Target: [bold]{alvo}[/bold]\nTipo detectado: [bold yellow]{tipo}[/bold yellow]\nCategorias: [cyan]{', '.join(cats)}[/cyan]", title="Análise Preliminar", border_style="blue"))
+
+    plugins_smart = filtrar_plugins_smart(plugins, alvo)
+    if not plugins_smart:
+        console.print("[yellow]nenhum plugin encontrado pra esse tipo.[/yellow]")
+        return []
+        
+    opcoes_ferramentas = [
+        questionary.Choice(f"{p['name']} - {p.get('description', '')}", value=p, checked=True)
+        for p in plugins_smart
+    ]
+    
+    plugins_selecionados = questionary.checkbox(
+        f"Ferramentas recomendadas para '{tipo}':",
+        choices=opcoes_ferramentas
+    ).ask()
+
+    if not plugins_selecionados:
+        return []
+
+    inputs = {"alvo": alvo}
+    console.print(f"[bold yellow]⚡ Rodando {len(plugins_selecionados)} plugins em paralelo...[/bold yellow]")
+    with console.status("[bold green]aguardando os containers docker para processamento...[/bold green]"):
+        resultados = run_plugins_paralelo(plugins_selecionados, inputs)
+
+    exibir_resultados(resultados)
+    return resultados
+
+def modo_manual(plugins: list):
+    categories = {}
+    for p in plugins:
+        cat = p.get("category", "Outros")
+        categories.setdefault(cat, []).append(p)
+
+    cat_escolha = questionary.select(
+        "Qual categoria deseja explorar?",
+        choices=list(categories.keys()) + ["⬅️  Voltar"]
+    ).ask()
+
+    if cat_escolha == "⬅️  Voltar" or not cat_escolha:
+        return "", []
+
+    cat_plugins = categories[cat_escolha]
+    
+    # NOVAS IMPLEMENTAÇÕES - AÇÃO RÁPIDA (Phase 8)
+    acao_rapida = questionary.select(
+        f"Categoria Selecionada: {cat_escolha} ({len(cat_plugins)} ferramentas)\nComo deseja prosseguir?",
+        choices=[
+            questionary.Choice("🚀 Executar Todas as Ferramentas (Varredura Completa)", value="all"),
+            questionary.Choice("🎯 Escolher Ferramentas Individualmente (Modo Cirúrgico)", value="select"),
+            questionary.Choice("⬅️  Voltar", value="back")
+        ],
+        style=questionary.Style([("pointer", "fg:yellow bold")])
+    ).ask()
+    
+    if acao_rapida == "back" or not acao_rapida:
+        return "", []
+        
+    plugins_selecionados = []
+    if acao_rapida == "all":
+        plugins_selecionados = cat_plugins
+    else:
+        opcoes_ferramentas = [
+            questionary.Choice(f"{p['name']} - {p.get('description', '')}", value=p, checked=True)
+            for p in cat_plugins
+        ]
+        plugins_selecionados = questionary.checkbox(
+            f"Escolha as ferramentas cirurgicamente:",
+            choices=opcoes_ferramentas
+        ).ask()
+
+    if not plugins_selecionados:
+        return "", []
+        
+    inputs_req = {}
+    for plugin in plugins_selecionados:
+        for campo in plugin.get("inputs", []):
+            inputs_req[campo["id"]] = campo
+
+    dados = {}
+    alvo = ""
+    for id_campo, campo in inputs_req.items():
+        resp = questionary.text(campo.get("prompt", f"Alvo para {id_campo}:")).ask()
+        if not resp:
+            break
+        dados[id_campo] = resp
+        if not alvo:
+            alvo = resp
+
+    if len(dados) != len(inputs_req):
+        console.print("[yellow]Investigação cancelada por falta de inputs.[/yellow]")
+        return "", []
+
+    execucao_modo = questionary.select(
+        "Como deseja executar estas ferramentas?",
+        choices=[
+            questionary.Choice("⚡ Em Paralelo (Mais rápido)", value="parallel"),
+            questionary.Choice("📋 Sequencial (Uma por vez)", value="sequential")
+        ]
+    ).ask()
+
+    resultados = []
+    if execucao_modo == "parallel":
+        console.print(f"[bold yellow]⚡ Disparando {len(plugins_selecionados)} plugins em paralelo...[/bold yellow]")
+        with console.status("[bold green]aguardando docker..."):
+            resultados = run_plugins_paralelo(plugins_selecionados, dados)
+        exibir_resultados(resultados)
+    elif execucao_modo == "sequential":
+        for plugin in plugins_selecionados:
+            console.print(f"[bold yellow]>> {plugin['name']}...[/bold yellow]")
+            with console.status(f"[green]{plugin['name']}..."):
+                res = run_plugin(plugin, dados)
+            resultados.append({"name": plugin["name"], "output": res})
+        exibir_resultados(resultados)
+        
+    return alvo, resultados
+
 def modo_interativo():
     """loop principal da interface interativa com Dashboard de Modos"""
     while True:
@@ -103,6 +261,7 @@ def modo_interativo():
         if not plugins:
             console.print("[red]nenhum yaml encontrado em plugins/.[/red]")
             return
+            
         modos = [
             questionary.Choice("🎯 Varredura Direta (Alvo Único / Paralelo)", value="direct"),
             questionary.Choice("🕸️ Workflow Autônomo (Agente de Camadas Profundas)", value="workflow"),
@@ -128,171 +287,23 @@ def modo_interativo():
 
         resultados = []
         alvo = ""
+        
         if modo in ["direct", "workflow"]:
             alvo = questionary.text("Alvo (email, telefone, username, URL, cripto, arquivo...):").ask()
             if not alvo:
                 continue
 
             if modo == "workflow":
-                console.print(Panel(
-                    "[italic]O Workflow pegará a saída do seu alvo inicial e vai minerar novas informações.\n"
-                    "O número de 'Camadas' define o quão fundo na toca do coelho o scanner deve ir.\n"
-                    "Ex: 2 Camadas = Investiga o alvo, acha um IP, investiga esse IP e para.[/italic]",
-                    border_style="magenta", title="Sobre as Camadas"
-                ))
-                verbose = questionary.confirm("Ativar Modo Explicativo (Mostrar pensamento do agente no terminal)?", default=True).ask()
-                try:
-                    camadas = int(questionary.text("Quantas camadas de profundidade investigar? (Mín 1, Máx 5):", default="2").ask())
-                except ValueError:
-                    camadas = 2
-                resultados = executar_workflow_recursivo(alvo, plugins, max_camadas=camadas, verbose=verbose)
-                exibir_resultados(resultados)
-                # Pula para a exportacao de logs
-                pass
+                resultados = modo_workflow(alvo, plugins)
             else:
-                tipo = detectar_tipo(alvo)
-                cats = categorias_recomendadas(alvo)
-                console.print(Panel(f"Target: [bold]{alvo}[/bold]\nTipo detectado: [bold yellow]{tipo}[/bold yellow]\nCategorias: [cyan]{', '.join(cats)}[/cyan]", title="Análise Preliminar", border_style="blue"))
-
-                plugins_smart = filtrar_plugins_smart(plugins, alvo)
-                if not plugins_smart:
-                    console.print("[yellow]nenhum plugin encontrado pra esse tipo.[/yellow]")
-                    continue
-                opcoes_ferramentas = [
-                    questionary.Choice(f"{p['name']} - {p.get('description', '')}", value=p, checked=True)
-                    for p in plugins_smart
-                ]
+                resultados = modo_direto(alvo, plugins)
                 
-                plugins_selecionados = questionary.checkbox(
-                    f"Ferramentas recomendadas para '{tipo}':",
-                    choices=opcoes_ferramentas
-                ).ask()
-
-                if not plugins_selecionados:
-                    continue
-
-                inputs = {"alvo": alvo}
-
-                console.print(f"[bold yellow]⚡ Rodando {len(plugins_selecionados)} plugins em paralelo...[/bold yellow]")
-                with console.status("[bold green]aguardando os containers docker para processamento...[/bold green]"):
-                    resultados = run_plugins_paralelo(plugins_selecionados, inputs)
-
-                exibir_resultados(resultados)
-                console.print("[yellow]nenhum plugin encontrado pra esse tipo.[/yellow]")
-                continue
-            opcoes_ferramentas = [
-                questionary.Choice(f"{p['name']} - {p.get('description', '')}", value=p, checked=True)
-                for p in plugins_smart
-            ]
-            
-            plugins_selecionados = questionary.checkbox(
-                f"Ferramentas automáticas para '{tipo}':",
-                choices=opcoes_ferramentas
-            ).ask()
-
-            if not plugins_selecionados:
-                continue
-
-            inputs = {"alvo": alvo}
-
-            if modo == "parallel":
-                console.print(f"[bold yellow]⚡ Rodando {len(plugins_selecionados)} plugins em paralelo...[/bold yellow]")
-                with console.status("[bold green]aguardando os containers docker..."):
-                    resultados = run_plugins_paralelo(plugins_selecionados, inputs)
-            else:
-                for plugin in plugins_selecionados:
-                    console.print(f"[bold yellow]>> {plugin['name']}...[/bold yellow]")
-                    with console.status(f"[green]{plugin['name']}..."):
-                        res = run_plugin(plugin, inputs)
-                    resultados.append({"name": plugin["name"], "output": res})
-
-            exibir_resultados(resultados)
-
         elif modo == "manual":
-            categories = {}
-            for p in plugins:
-                cat = p.get("category", "Outros")
-                categories.setdefault(cat, []).append(p)
+            alvo, resultados = modo_manual(plugins)
 
-            cat_escolha = questionary.select(
-                "Qual categoria deseja explorar?",
-                choices=list(categories.keys()) + ["⬅️  Voltar"]
-            ).ask()
-
-            if cat_escolha == "⬅️  Voltar":
-                continue
-
-            cat_plugins = categories[cat_escolha]
-            opcoes_ferramentas = [
-                questionary.Choice(f"{p['name']} - {p.get('description', '')}", value=p, checked=True)
-                for p in cat_plugins
-            ]
-
-            plugins_selecionados = questionary.checkbox(
-                f"Escolha as ferramentas que deseja executar da categoria {cat_escolha}:",
-                choices=opcoes_ferramentas
-            ).ask()
-
-            if not plugins_selecionados:
-                continue
-            inputs_req = {}
-            for plugin in plugins_selecionados:
-                for campo in plugin.get("inputs", []):
-                    inputs_req[campo["id"]] = campo
-
-            dados = {}
-            for id_campo, campo in inputs_req.items():
-                resp = questionary.text(campo.get("prompt", f"Alvo para {id_campo}:")).ask()
-                if not resp:
-                    break
-                dados[id_campo] = resp
-                if not alvo:
-                    alvo = resp
-
-            if len(dados) != len(inputs_req):
-                console.print("[yellow]Investigação cancelada por falta de inputs.[/yellow]")
-                continue
-
-            execucao_modo = questionary.select(
-                "Como deseja executar estas ferramentas?",
-                choices=[
-                    questionary.Choice("⚡ Em Paralelo (Mais rápido)", value="parallel"),
-                    questionary.Choice("📋 Sequencial (Uma por vez)", value="sequential")
-                ]
-            ).ask()
-
-            if execucao_modo == "parallel":
-                console.print(f"[bold yellow]⚡ Disparando {len(plugins_selecionados)} plugins em paralelo...[/bold yellow]")
-                with console.status("[bold green]aguardando docker..."):
-                    resultados = run_plugins_paralelo(plugins_selecionados, dados)
-                exibir_resultados(resultados)
-            elif execucao_modo == "sequential":
-                for plugin in plugins_selecionados:
-                    console.print(f"[bold yellow]>> {plugin['name']}...[/bold yellow]")
-                    with console.status(f"[green]{plugin['name']}..."):
-                        res = run_plugin(plugin, dados)
-                    resultados.append({"name": plugin["name"], "output": res})
-                exibir_resultados(resultados)
-        if resultados:
-            opcoes_export = questionary.checkbox(
-                "O que quer exportar?",
-                choices=[
-                    questionary.Choice("📄 Relatório PDF", checked=True),
-                    questionary.Choice("🔗 Grafo de Links (HTML interativo)", checked=True)
-                ]
-            ).ask()
-
-
-            if not opcoes_export:
-                continue
-
-            if "📄 Relatório PDF" in opcoes_export:
-                caminho = gerar_relatorio(alvo, resultados)
-                console.print(f"\n[bold green]✅ PDF: {caminho}[/bold green]")
-
-            if "🔗 Grafo de Links (HTML interativo)" in opcoes_export:
-                caminho_grafo = gerar_grafo(alvo, resultados)
-                console.print(f"[bold green]✅ Grafo: {caminho_grafo}[/bold green]\n")
+        # Trata as exportacoes se houve resultado
+        if alvo and resultados:
+            processar_exportacoes(alvo, resultados)
 
         if not questionary.confirm("Fazer mais uma investigação?").ask():
             break
