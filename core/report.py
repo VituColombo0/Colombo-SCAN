@@ -47,9 +47,20 @@ def gerar_relatorio(alvo: str, resultados: list[dict]) -> str:
 
         pdf.set_font("Courier", "", 8)
         pdf.set_text_color(30, 30, 30)
-        for linha in saida.splitlines():
+        linhas_validas = [l for l in saida.splitlines() if l.strip()]
+        linhas_impressas = 0
+        
+        for linha in linhas_validas:
+            if linhas_impressas > 100:
+                pdf.set_text_color(200, 50, 50)
+                pdf.multi_cell(0, 5, txt=f"\n... ✂️ [Saída truncada no PDF. Verifique o arquivo .JSON ou .CSV para o log completo ({len(linhas_validas)} linhas originais)] ✂️ ...")
+                break
             try:
-                pdf.multi_cell(0, 5, txt=linha[:300])
+                # Wrap linhas gigantes no PDF (ex: hashs massivos, payload JS)
+                if len(linha) > 120:
+                    linha = linha[:120] + "..."
+                pdf.multi_cell(0, 5, txt=linha)
+                linhas_impressas += 1
             except Exception:
                 pass
         pdf.ln(4)

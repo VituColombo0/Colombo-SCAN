@@ -1,9 +1,0 @@
-name: "Metadata Deep Scan (ExifTool)"
-description: "Extrai metadados profundos de arquivos PDF, imagens e documentos."
-category: "📂 Documentos e Arquivos"
-image: "vimagick/exiftool:latest"
-command: "-u {alvo}"
-inputs:
-  - id: "alvo"
-    type: "text"
-    prompt: "URL ou Caminho do arquivo para metadados:"

@@ -1,0 +1,7 @@
+name: Real-time Social Trends (Social Searcher)
+description: Busca menções recentes a um nome, termo ou marca em diversas redes sociais de forma agregada.
+author: Social Searcher
+version: 1.0
+category: 🌐 Redes Sociais
+target_type: [username, name]
+command: 'curl -s "https://api.social-searcher.com/v2/search?q={target}&limit=5"'

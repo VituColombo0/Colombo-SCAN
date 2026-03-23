@@ -1,0 +1,7 @@
+name: Bitquery Crypto Insights
+description: Busca transações e saldos em diversas blockchains (BTC, ETH, BSC) usando a API de GraphQL da Bitquery. Requere API Key.
+author: Bitquery
+version: 1.0
+category: 💰 Finanças e Crypto
+target_type: [crypto, btc_address, eth_address]
+command: 'curl -s -X POST -H "Content-Type: application/json" -H "X-API-KEY: {env.BITQUERY_API_KEY}" -d "{\"query\": \"query { bitcoin { transactions(txHash: {\\\\\\\"is\\\\\\\": \\\\\\\"{target}\\\\\\\"}) { hash block { height } } } }\"}" https://graphql.bitquery.io'

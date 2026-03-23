@@ -1,0 +1,6 @@
+name: TruffleHog (Secrets Finder)
+description: Escaneia URLs, diretórios ou repositórios Git atrás de senhas, chaves AWS, Tokens de API e credenciais vazadas.
+author: TruffleSecurity
+version: 3.x
+category: 🔒 DevSecOps & Repositories
+command: docker run --rm trufflesecurity/trufflehog:latest any {target} --only-verified

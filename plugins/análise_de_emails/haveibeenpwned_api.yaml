@@ -1,9 +1,0 @@
-name: HaveIBeenPwned API
-category: 📧 Análise de Emails
-description: HaveIBeenPwned API plugin
-type: docker
-image: curlimages/curl
-command: -s -A 'Mozilla' https://haveibeenpwned.com/api/v3/breachedaccount/{alvo}
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para HaveIBeenPwned API:'

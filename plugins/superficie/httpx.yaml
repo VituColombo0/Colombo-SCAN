@@ -1,0 +1,6 @@
+name: ProjectDiscovery HTTPX
+description: Probe passivo para listar tecnologias ativas, resposta HTTP e Títulos de Páginas.
+author: ProjectDiscovery
+version: latest
+category: 🕸️ Attack Surface Mapping
+command: docker run --rm projectdiscovery/httpx:latest -u {target} -silent -tech-detect -title -ip

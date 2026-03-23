@@ -1,9 +1,0 @@
-name: Subfinder
-category: 🌐 Redes e IPs
-description: Subfinder plugin
-type: docker
-image: projectdiscovery/subfinder
-command: -d {alvo} -silent
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para Subfinder:'

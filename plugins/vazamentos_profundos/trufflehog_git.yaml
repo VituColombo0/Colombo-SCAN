@@ -1,9 +1,0 @@
-name: TruffleHog Git
-category: 🔐 Vazamentos Profundos
-description: TruffleHog Git plugin
-type: docker
-image: trufflesecurity/trufflehog
-command: github --repo {alvo}
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para TruffleHog Git:'

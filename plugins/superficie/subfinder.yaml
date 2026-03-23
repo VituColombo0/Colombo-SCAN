@@ -1,0 +1,6 @@
+name: ProjectDiscovery Subfinder
+description: Descoberta passiva e ultra-rápida de subdomínios (Attack Surface Mapping). O padrão ouro da indústria corporativa.
+author: ProjectDiscovery
+version: latest
+category: 🕸️ Attack Surface Mapping
+command: docker run --rm projectdiscovery/subfinder:latest -d {target} -silent

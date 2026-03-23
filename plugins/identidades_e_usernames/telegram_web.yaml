@@ -1,0 +1,7 @@
+name: Telegram Basic OSINT (Native Scraper)
+description: Vasculha perfis ou canais do Telegram Web para obter Nomes Reais, Biografia e links de Foto (Sem precisar de Conta ou API).
+author: ColomboNative
+version: 1.0
+category: 👤 Identidades e Usernames
+target_type: [username, telegram]
+command: python3 plugins/scripts/telegram_scraper.py {target}

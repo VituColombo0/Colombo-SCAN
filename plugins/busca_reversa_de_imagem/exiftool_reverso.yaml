@@ -1,9 +1,0 @@
-name: ExifTool Reverso
-category: 🔍 Busca Reversa de Imagem
-description: ExifTool Reverso plugin
-type: docker
-image: v4tech/exiftool
-command: '{alvo}'
-inputs:
-- id: alvo
-  prompt: 'Caminho ou URL da imagem suspeita:'

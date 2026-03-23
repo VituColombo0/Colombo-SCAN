@@ -1,0 +1,7 @@
+name: Recursive Metadata Explorer
+description: Busca recursiva por documentos (PDF/DOC) em um domínio e extração de metadados periciais (Autores, GPS, Software).
+author: ColomboForensics
+version: 1.0
+category: 📄 Documentos e Arquivos
+target_type: [domain]
+command: python3 plugins/scripts/metadata_finder.py {target}

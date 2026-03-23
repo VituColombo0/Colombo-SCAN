@@ -1,0 +1,7 @@
+name: Wayback Machine Heritage
+description: Consulta o histórico do 'Internet Archive' para descobrir a primeira e a última vez que um site foi visto, além de mapas de snapshots históricos.
+author: Internet Archive
+version: 1.0
+category: 🏛️ Forense Digital & Arqueologia
+target_type: [domain, url]
+command: 'curl -s "https://web.archive.org/cdx/search/cdx?url={target}&output=json&limit=5"'

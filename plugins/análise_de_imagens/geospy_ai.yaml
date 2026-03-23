@@ -1,0 +1,7 @@
+name: GeoSpy AI (Deep Geolocation)
+description: Inteligência Artificial preditiva que estima a coordenada GPS de uma foto apenas analisando a geografia/arquitetura (Requer GEOSPY_API_KEY no arquivo .env)
+author: GeoSpy API
+version: 1.0
+category: 🖼️ Análise de Imagens
+target_type: [image, foto, exif]
+command: curl -s -X POST https://api.geospy.ai/predict -H "Authorization:Bearer {env.GEOSPY_API_KEY}" -F "image=@{target}"

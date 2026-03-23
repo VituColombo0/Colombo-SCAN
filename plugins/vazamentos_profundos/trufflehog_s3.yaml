@@ -1,9 +1,0 @@
-name: TruffleHog S3
-category: 🔐 Vazamentos Profundos
-description: TruffleHog S3 plugin
-type: docker
-image: trufflesecurity/trufflehog
-command: s3 --bucket {alvo}
-inputs:
-- id: alvo
-  prompt: 'Digite o alvo para TruffleHog S3:'

@@ -1,0 +1,7 @@
+name: Discord Snowflake OSINT
+description: Extrai a data de criação extata, o banner e o avatar associados a um Snowflake ID do Discord usando APIs abertas online.
+author: Public API (Mesalytic)
+version: 1.0
+category: 👤 Identidades e Usernames
+target_type: [username, discord_id]
+command: curl -sL https://discordlookup.mesalytic.moe/v1/user/{target}

@@ -1,0 +1,7 @@
+name: FaceCheck.id Biometric Search
+description: Busca por fotos de rostos em toda a internet pública (incluindo redes perigosas e fóruns) usando IA de reconhecimento facial. Requere API Key.
+author: FaceCheck
+version: 1.0
+category: 🖼️ Análise de Imagens
+target_type: [image, foto]
+command: 'curl -s -X POST https://facecheck.id/api/search -H "Authorization: Bearer {env.FACECHECK_API_KEY}" -F "images=@{target}" -F "id_search=true"'

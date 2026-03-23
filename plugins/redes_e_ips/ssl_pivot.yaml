@@ -1,0 +1,7 @@
+name: SSL Certificate Pivot (crt.sh)
+description: Mapeia a infraestrutura técnica buscando por todos os domínios vinculados ao mesmo certificado SSL (Fingerprint). Excelente para achar subdomínios ocultos.
+author: crt.sh
+version: 1.0
+category: 🕸️ Mapeamento de Superfície
+target_type: [domain]
+command: "curl -s 'https://crt.sh/?q={target}&output=json' | python3 -c 'import sys, json; data=json.load(sys.stdin); print(\"--- CERTIFICADOS SSL ENCONTRADOS ---\"); [print(f\"🔹 {x[\\\"common_name\\\"]} (ID: {x[\\\"id\\\"]})\") for x in data[:10]]'"
