@@ -1,5 +1,14 @@
 import re
 
+# Noise words/fragments that should never be treated as valid investigative leads
+NOISE_WORDS = {
+    "maria", "vitoria", "jose", "santos", "silva", "oliveira", "souza", "pereira",
+    "costa", "carvalho", "alves", "ferreira", "barboza", "gonçalves", "martins",
+    "admin", "root", "test", "null", "undefined", "true", "false", "user", "guest",
+    "senha", "password", "login", "proxy", "server", "client", "default", "none",
+    "dos", "da", "de", "do", "das", "pelo", "pela"
+}
+
 def extract_entities(text: str) -> dict:
     """Extrai novos alvos (Emails, IPs, Domínios, Telefones) de um texto cru via Regex."""
     if not isinstance(text, str):
@@ -19,8 +28,13 @@ def extract_entities(text: str) -> dict:
 
     # Filtros de ruído estrutural
     ips = {ip for ip in ips if not ip.startswith(("127.", "192.168.", "10.", "172.16."))}
+    
     # Limpa telefones pra remover carácteres especiais pra trigger mais limpo
     phones = {re.sub(r'\D', '', p) for p in phones if len(re.sub(r'\D', '', p)) >= 10}
+    
+    # Filtro de ruído para domínios e e-mails (evitar nomes comuns como domínios)
+    domains = {d.lower() for d in domains if d.lower() not in NOISE_WORDS and "." in d}
+    emails = {e.lower() for e in emails if e.split("@")[0] not in NOISE_WORDS}
     
     return {
         "ip": list(ips),

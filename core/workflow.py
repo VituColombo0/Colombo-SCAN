@@ -3,7 +3,6 @@ Colombo Scanner — Recursive Workflow Engine
 Runs plugins for a target, extracts new leads from output, and investigates recursively.
 Enhanced with entity extraction and persistence.
 """
-from core.extractor import extract_entities
 from core.runner import run_plugins_paralelo
 from core.smart_scan import filtrar_plugins_smart, detectar_tipo
 from core.intelligence import extrair_entidades
@@ -13,14 +12,15 @@ from rich.console import Console
 log = get_logger("workflow")
 console = Console()
 
+from core.entities import ScanResult, EntityType
 
 def executar_workflow_recursivo(alvo_inicial: str, plugins_disponiveis: list,
-                                max_camadas: int = 2, verbose: bool = True) -> list:
+                                 max_camadas: int = 2, verbose: bool = True) -> list[ScanResult]:
     """
     Runs plugins for the target. Extracts new leads from output.
     Uses those leads as new targets recursively up to max_camadas depth.
     """
-    resultados_totais = []
+    resultados_totais: list[ScanResult] = []
     alvos_processados = set()
     alvos_fila = {alvo_inicial}
 
@@ -32,6 +32,7 @@ def executar_workflow_recursivo(alvo_inicial: str, plugins_disponiveis: list,
             console.print(f"\n[bold blue][WORKFLOW][/bold blue] Iniciando Camada {camada} com {len(alvos_fila)} alvo(s).")
 
         alvos_camada_seguinte = set()
+        leads_count = 0
 
         for alvo in alvos_fila:
             if alvo in alvos_processados:
@@ -45,49 +46,41 @@ def executar_workflow_recursivo(alvo_inicial: str, plugins_disponiveis: list,
 
             plugins_roda = filtrar_plugins_smart(plugins_disponiveis, alvo)
             if not plugins_roda:
-                if verbose:
-                    console.print(f"[dim]  Nenhum plugin útil para {alvo}[/dim]")
                 continue
 
-            res = run_plugins_paralelo(plugins_roda, {"alvo": alvo})
-
-            for r in res:
-                r["alvo_origem"] = alvo
-                r["camada"] = camada
-
+            # Pass 'camada' in inputs so ScanResult captures it
+            res = run_plugins_paralelo(plugins_roda, {"alvo": alvo, "camada": camada})
             resultados_totais.extend(res)
 
-            # Extract new leads (only if not last layer)
-            if camada < max_camadas:
-                if verbose:
-                    console.print(f"  [dim]Extraindo novas pistas dos {len(res)} resultados de {alvo}...[/dim]")
-
-                novas_pistas = 0
+            # Extract new leads
+            if camada < max_camadas and leads_count < MAX_LEADS_PER_LAYER:
+                novas_pistas_alvo = 0
                 for r in res:
-                    output = r.get("output", "")
+                    output = r.raw_output
+                    if not output: continue
 
-                    # Use legacy extractor for compatibility
-                    extraido = extract_entities(output)
-                    for tipo, pistas in extraido.items():
-                        for p in pistas:
-                            if p not in alvos_processados and len(p) > 3:
-                                alvos_camada_seguinte.add(p)
-                                novas_pistas += 1
-
-                    # Also use new entity extractor for better coverage
-                    entities = extrair_entidades(output, source_tool=r.get("name", ""), source_target=alvo)
+                    entities = extrair_entidades(output, source_tool=r.plugin_name, source_target=alvo)
                     for e in entities:
-                        if e.value not in alvos_processados and len(e.value) > 3:
-                            alvos_camada_seguinte.add(e.value)
-                            novas_pistas += 1
+                        if e.type not in [EntityType.EMAIL, EntityType.IP, EntityType.DOMAIN, EntityType.PHONE, EntityType.USERNAME]:
+                            continue
+                            
+                        val = e.value
+                        if val not in alvos_processados and val not in alvos_camada_seguinte and len(val) > 3:
+                            if leads_count < MAX_LEADS_PER_LAYER:
+                                alvos_camada_seguinte.add(val)
+                                novas_pistas_alvo += 1
+                                leads_count += 1
 
-                if verbose and novas_pistas > 0:
-                    console.print(f"  [bold green]✓ Encontradas {novas_pistas} novas pistas relacionadas a {alvo}![/bold green]")
+                if verbose and novas_pistas_alvo > 0:
+                    console.print(f"  [bold green]✓ Encontradas {novas_pistas_alvo} novas pistas relacionadas a {alvo}![/bold green]")
+
+            if leads_count >= MAX_LEADS_PER_LAYER and verbose:
+                # Optional warning...
+                pass
 
         alvos_fila = alvos_camada_seguinte
 
     if verbose:
         console.print(f"\n[bold blue][WORKFLOW][/bold blue] Finalizado! Total de alvos únicos investigados: {len(alvos_processados)}")
 
-    log.info(f"Workflow completo: {len(alvos_processados)} alvos, {len(resultados_totais)} resultados")
     return resultados_totais

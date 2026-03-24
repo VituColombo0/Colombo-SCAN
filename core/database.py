@@ -149,6 +149,20 @@ def close_case(case_id: int):
     conn.close()
 
 
+def delete_case(case_id: int):
+    """Deletes a case and all its associated data."""
+    conn = get_connection()
+    # Delete child records first to avoid foreign key violations
+    conn.execute("DELETE FROM raw_results WHERE scan_id IN (SELECT id FROM scans WHERE case_id = ?)", (case_id,))
+    conn.execute("DELETE FROM entities WHERE case_id = ?", (case_id,))
+    conn.execute("DELETE FROM relations WHERE case_id = ?", (case_id,))
+    conn.execute("DELETE FROM scans WHERE case_id = ?", (case_id,))
+    conn.execute("DELETE FROM cases WHERE id = ?", (case_id,))
+    conn.commit()
+    conn.close()
+    log.info(f"Case deletado: #{case_id}")
+
+
 # --- Scan Operations ---
 
 def create_scan(case_id: int, target: str, scan_type: str = "direct", plugin_count: int = 0) -> int:
@@ -189,11 +203,16 @@ def save_entities(case_id: int, scan_id: int, entities: list[Entity]):
          e.source_target, e.confidence, json.dumps(e.metadata), now)
         for e in entities
     ]
-    conn.executemany(
-        "INSERT INTO entities (case_id, scan_id, type, value, source_tool, source_target, confidence, metadata, created_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        data
-    )
+    
+    # SQLite has a max variable limit (often 999 or 32766). We chunk inserts to prevent OperationalError.
+    chunk_size = 500
+    for i in range(0, len(data), chunk_size):
+        chunk = data[i:i + chunk_size]
+        conn.executemany(
+            "INSERT INTO entities (case_id, scan_id, type, value, source_tool, source_target, confidence, metadata, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            chunk
+        )
     conn.commit()
     conn.close()
     log.info(f"Salvos {len(entities)} entidades no case #{case_id}")
@@ -230,6 +249,27 @@ def get_entity_correlations(case_id: int) -> list[dict]:
     return [dict(r) for r in rows]
 
 
+def get_new_entities_diff(case_id: int, current_scan_id: int) -> list[dict]:
+    """
+    Finds entities from current_scan_id that did NOT exist in any PREVIOUS scans
+    for the same case_id based on their (value, type) combination.
+    """
+    conn = get_connection()
+    rows = conn.execute("""
+        SELECT e1.* FROM entities e1
+        WHERE e1.scan_id = ?
+        AND NOT EXISTS (
+            SELECT 1 FROM entities e2
+            WHERE e2.case_id = e1.case_id 
+              AND e2.scan_id < e1.scan_id
+              AND e2.value = e1.value 
+              AND e2.type = e1.type
+        )
+    """, (current_scan_id,)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
 # --- Relation Operations ---
 
 def save_relations(case_id: int, relations: list[Relation]):
@@ -244,11 +284,15 @@ def save_relations(case_id: int, relations: list[Relation]):
          r.source_tool, r.confidence, now)
         for r in relations
     ]
-    conn.executemany(
-        "INSERT INTO relations (case_id, entity_a_value, entity_b_value, relation_type, source_tool, confidence, created_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        data
-    )
+    
+    chunk_size = 500
+    for i in range(0, len(data), chunk_size):
+        chunk = data[i:i + chunk_size]
+        conn.executemany(
+            "INSERT INTO relations (case_id, entity_a_value, entity_b_value, relation_type, source_tool, confidence, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            chunk
+        )
     conn.commit()
     conn.close()
 

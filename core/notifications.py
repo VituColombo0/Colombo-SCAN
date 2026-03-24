@@ -71,3 +71,42 @@ def notificar_scan_completo(alvo: str, total_plugins: int, total_entidades: int,
             _send_webhook(tg_url, payload)
         except Exception as e:
             log.warning(f"Falha Telegram: {e}")
+
+
+def notificar_alerta_monitoramento(alvo: str, case_name: str, novas_entidades_ct: int, detalhes: str):
+    """
+    Sends a special watchdog alert when new entities are found.
+    """
+    webhook_url = os.environ.get("WEBHOOK_URL", "")
+    telegram_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    telegram_chat = os.environ.get("TELEGRAM_CHAT_ID", "")
+
+    if not webhook_url and not (telegram_token and telegram_chat):
+        return
+
+    mensagem = (
+        f"🚨 **ALARME OSINT — Cão de Guarda Colombo** 🚨\n\n"
+        f"🎯 Alvo: `{alvo}`\n"
+        f"📂 Case: {case_name}\n"
+        f"👀 Foram descobertas **{novas_entidades_ct}** novas pistas desde a última varredura!\n\n"
+        f"🔍 Detalhes do achado:\n{detalhes}\n"
+    )
+
+    if webhook_url:
+        if "discord" in webhook_url:
+            payload = {"content": mensagem}
+        elif "slack" in webhook_url:
+            payload = {"text": mensagem.replace("**", "*")}
+        else:
+            payload = {"text": mensagem}
+        _send_webhook(webhook_url, payload)
+
+    if telegram_token and telegram_chat:
+        try:
+            msg_clean = mensagem.replace("**", "*").replace("`", "")
+            tg_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
+            payload = {"chat_id": telegram_chat, "text": msg_clean, "parse_mode": "Markdown"}
+            _send_webhook(tg_url, payload)
+        except Exception as e:
+            log.warning(f"Falha Telegram: {e}")
+

@@ -7,7 +7,7 @@ from typing import List, Dict, Any
 from rich.table import Table
 from rich.panel import Panel
 from rich.console import Console
-from core.entities import Entity, EntityType, Relation, RelationType
+from core.entities import Entity, EntityType, Relation, RelationType, ScanResult
 from core.logger import get_logger
 
 log = get_logger("intelligence")
@@ -20,15 +20,26 @@ PATTERNS = {
     EntityType.DOMAIN: r'(?<!@)\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b',
     EntityType.PHONE: r'(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?9?\d{4}[-.\s]?\d{4}',
     EntityType.URL: r'https?://[^\s"\'<>]+',
-    EntityType.USERNAME: r'@([\w._]{3,30})',
+    EntityType.USERNAME: r'(?<![\w.-])@([\w._]{3,30})',
     EntityType.HASH: r'\b[a-fA-F0-9]{32,64}\b',
     EntityType.CRYPTO_WALLET: r'\b(?:bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}\b|0x[a-fA-F0-9]{40}',
 }
 
+# Noise words (don't treat common names/fragments as useful usernames/leads)
+NOISE_WORDS = {
+    "maria", "vitoria", "jose", "santos", "silva", "oliveira", "souza", "pereira",
+    "costa", "carvalho", "alves", "ferreira", "barboza", "gonçalves", "martins",
+    "admin", "root", "test", "null", "undefined", "true", "false", "user", "guest",
+    "login", "proxy", "server", "client", "default", "none",
+    "dos", "da", "de", "do", "das", "pelo", "pela", "index", "home", "search",
+    "senha", "password"
+}
+
 # Noise filters
 IGNORE_IPS = {"127.0.0.1", "0.0.0.0", "255.255.255.255"}
-IGNORE_DOMAINS = {"example.com", "localhost", "github.com", "docker.com", "googleapis.com"}
-IGNORE_EMAILS = {"noreply@", "no-reply@", "postmaster@", "mailer-daemon@"}
+IGNORE_DOMAINS = {"example.com", "localhost", "github.com", "docker.com", "googleapis.com", 
+                  "schemas.microsoft.com", "w3.org", "w.org", "purl.org"}
+IGNORE_EMAILS = {"noreply@", "no-reply@", "postmaster@", "mailer-daemon@", "admin@", "test@"}
 
 
 def extrair_entidades(texto: str, source_tool: str = "", source_target: str = "") -> list[Entity]:
@@ -48,20 +59,29 @@ def extrair_entidades(texto: str, source_tool: str = "", source_target: str = ""
         for match in matches:
             value = match.strip().lower()
 
-            # Noise filtering
-            if entity_type == EntityType.IP and value in IGNORE_IPS:
+            # Global noise word filter (skip if entity value is just a common word)
+            if value in NOISE_WORDS or (len(value) < 3 and entity_type != EntityType.IP):
                 continue
-            if entity_type == EntityType.IP and value.startswith(("10.", "192.168.", "172.16.")):
-                continue
-            if entity_type == EntityType.DOMAIN and value in IGNORE_DOMAINS:
-                continue
-            if entity_type == EntityType.EMAIL and any(value.startswith(x) for x in IGNORE_EMAILS):
-                continue
+
+            # Type-specific filtering
+            if entity_type == EntityType.IP:
+                if value in IGNORE_IPS or value.startswith(("10.", "192.168.", "172.16.")):
+                    continue
+            
+            if entity_type == EntityType.DOMAIN:
+                if value in IGNORE_DOMAINS or "." not in value or value.endswith((".js", ".css", ".png", ".jpg")):
+                    continue
+            
+            if entity_type == EntityType.EMAIL:
+                if any(value.startswith(x) for x in IGNORE_EMAILS) or "@localhost" in value:
+                    continue
+            
             if entity_type == EntityType.PHONE:
                 digits = re.sub(r'\D', '', value)
                 if len(digits) < 10:
                     continue
                 value = digits
+            
             if entity_type == EntityType.HASH:
                 # Skip if it looks like a common hex string (not a real hash)
                 if len(value) not in (32, 40, 64):
@@ -70,9 +90,13 @@ def extrair_entidades(texto: str, source_tool: str = "", source_target: str = ""
             key = (entity_type, value)
             if key not in seen:
                 seen.add(key)
+                # Keep original case for usernames if needed (regex groups)
+                clean_value = value if entity_type != EntityType.USERNAME else match
+                if clean_value.startswith("@"): clean_value = clean_value[1:]
+                
                 entities.append(Entity(
                     type=entity_type,
-                    value=value if entity_type != EntityType.USERNAME else match,
+                    value=clean_value,
                     source_tool=source_tool,
                     source_target=source_target
                 ))
@@ -81,7 +105,7 @@ def extrair_entidades(texto: str, source_tool: str = "", source_target: str = ""
     return entities
 
 
-def extrair_insights(resultados: List[Dict[str, Any]]) -> Dict[str, Any]:
+def extrair_insights(resultados: List[ScanResult]) -> Dict[str, Any]:
     """
     Extracts intelligence insights from scan results.
     Returns structured insights with scoring and correlation data.
@@ -91,9 +115,9 @@ def extrair_insights(resultados: List[Dict[str, Any]]) -> Dict[str, Any]:
     entity_sources: dict[str, set] = {}  # value -> set of tools
 
     for res in resultados:
-        ferramenta = res.get("name", "Unknown")
-        saida = str(res.get("output", ""))
-        alvo = res.get("alvo_origem", "")
+        ferramenta = res.plugin_name
+        saida = str(res.raw_output)
+        alvo = res.target
 
         # Extract entities
         entities = extrair_entidades(saida, source_tool=ferramenta, source_target=alvo)
@@ -185,10 +209,12 @@ def exibir_dashboard_inteligencia(insights: Dict[str, Any]):
 
         for tipo, valores in by_type.items():
             emoji = type_emojis.get(tipo, "🔹")
-            display_values = ", ".join(valores[:5])
-            if len(valores) > 5:
-                display_values += f" (+{len(valores) - 5})"
-            entity_table.add_row(f"{emoji} {tipo.upper()}", display_values, str(len(valores)))
+            # Deduplicate by value within the type
+            unique_vals = list(dict.fromkeys(valores))
+            display_values = ", ".join(unique_vals[:5])
+            if len(unique_vals) > 5:
+                display_values += f" (+{len(unique_vals) - 5})"
+            entity_table.add_row(f"{emoji} {tipo.upper()}", display_values, str(len(unique_vals)))
 
         console.print(Panel(entity_table, border_style="magenta"))
 

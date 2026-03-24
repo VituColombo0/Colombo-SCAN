@@ -2,11 +2,14 @@ import os
 import json
 import re
 import datetime
+import html
 
 PASTA_RELATORIOS = "relatorios"
 os.makedirs(PASTA_RELATORIOS, exist_ok=True)
 
-def _extrair_nos_arestas(alvo: str, resultados: list[dict]) -> tuple[list, list]:
+from core.entities import ScanResult
+
+def _extrair_nos_arestas(alvo: str, resultados: list[ScanResult]) -> tuple[list, list]:
     """
     parse basico nos resultados pra achar emails, IPs, usuarios e URLs
     e montar os nos e arestas do grafo
@@ -28,9 +31,9 @@ def _extrair_nos_arestas(alvo: str, resultados: list[dict]) -> tuple[list, list]
         "ip": "#f39c12", "usuario": "#9b59b6", "telefone": "#1abc9c"
     }
 
-    for resultado in resultados:
-        texto = resultado.get("output", "")
-        ferramenta = resultado.get("name", "?")
+    for res in resultados:
+        texto = res.raw_output
+        ferramenta = res.plugin_name
 
         for tipo, padrao in PADROES.items():
             for match in re.findall(padrao, texto, re.IGNORECASE):
@@ -39,32 +42,37 @@ def _extrair_nos_arestas(alvo: str, resultados: list[dict]) -> tuple[list, list]
                     continue
                 vistos.add(val)
 
-                # Groups names exactly mapping to visual FA codes on HTML template
+                val_escaped = html.escape(val[:40])
+                ferramenta_escaped = html.escape(ferramenta[:20])
+
                 nos.append({
                     "id": id_no,
-                    "label": val[:40],
-                    "title": f"Encontrado por: {ferramenta}",
+                    "label": val_escaped,
+                    "title": f"Encontrado por: {ferramenta_escaped}",
                     "group": tipo,
                     "value": 15
                 })
-                arestas.append({"from": 0, "to": id_no, "label": ferramenta[:20]})
+                arestas.append({"from": 0, "to": id_no, "label": ferramenta_escaped})
                 id_no += 1
 
     return nos, arestas
 
-def gerar_grafo(alvo: str, resultados: list[dict]) -> str:
+def gerar_grafo(alvo: str, resultados: list[ScanResult]) -> str:
     """gera um html interativo com o grafo de relacionamentos do alvo"""
     nos, arestas = _extrair_nos_arestas(alvo, resultados)
     template_path = os.path.join(os.path.dirname(__file__), "graph_template.html")
+    # ... rest of the function remains same ...
     with open(template_path, 'r', encoding='utf-8') as f:
         template = f.read()
 
-    html = template.replace("{alvo}", alvo) \
+    html = template.replace("{alvo}", html.escape(alvo)) \
                    .replace("{nodes}", json.dumps(nos)) \
                    .replace("{edges}", json.dumps(arestas))
 
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    nome = f"colombo_grafo_{alvo.replace(' ','_')[:30]}_{ts}.html"
+    # Sanitize TARGET to prevent Path Traversal
+    alvo_safe = re.sub(r'[^a-zA-Z0-9.-]', '_', alvo).strip('_')[:30]
+    nome = f"colombo_grafo_{alvo_safe}_{ts}.html"
     caminho = os.path.join(PASTA_RELATORIOS, nome)
 
     with open(caminho, 'w', encoding='utf-8') as f:

@@ -6,7 +6,8 @@ Extensible and parallelized OSINT toolkit built with Python and Docker.
 
 - Python 3.10+
 - Docker
-- PyYAML, questionary, rich, fpdf2
+- PyYAML, questionary, rich, fpdf2, python-dotenv
+- fastapi, uvicorn (necessários para o modo --api)
 
 ## Initialization
 

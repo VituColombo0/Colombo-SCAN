@@ -98,6 +98,8 @@ def create_app():
         target = req.target.strip()
         if not target:
             raise HTTPException(400, "Target is required")
+        if req.max_workers <= 0:
+            raise HTTPException(400, "max_workers must be greater than 0")
 
         tipo = detectar_tipo(target)
 
@@ -173,6 +175,14 @@ def create_app():
     @app.get("/cases/{case_id}/correlations")
     def get_case_correlations(case_id: int):
         return get_entity_correlations(case_id)
+
+    @app.get("/cases/{case_id}/scans")
+    def list_case_scans(case_id: int):
+        from core.database import get_connection
+        conn = get_connection()
+        rows = conn.execute("SELECT * FROM scans WHERE case_id = ? ORDER BY started_at DESC", (case_id,)).fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
 
     return app
 

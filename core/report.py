@@ -3,6 +3,10 @@ import csv
 from fpdf import FPDF
 import datetime
 import os
+import re
+from dataclasses import asdict
+from core.entities import ScanResult
+
 PASTA_RELATORIOS = "relatorios"
 os.makedirs(PASTA_RELATORIOS, exist_ok=True)
 
@@ -21,11 +25,10 @@ class PDF(FPDF):
         self.set_text_color(150, 150, 150)
         self.cell(0, 8, f"Colombo Scanner | {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')} | Pag. {self.page_no()}", align="C")
 
-def gerar_relatorio(alvo: str, resultados: list[dict]) -> str:
+def gerar_relatorio(alvo: str, resultados: list[ScanResult]) -> str:
     """
-    recebe o alvo investigado e uma lista de dicts com
-    {"name": nome_da_ferramenta, "output": saida}
-    e gera um pdf formatado na pasta relatorios/
+    recebe o alvo investigado e uma lista de objetos ScanResult
+    e gera um pdf, json e csv na pasta relatorios/
     """
     pdf = PDF()
     pdf.add_page()
@@ -38,8 +41,8 @@ def gerar_relatorio(alvo: str, resultados: list[dict]) -> str:
     pdf.ln(5)
 
     for r in resultados:
-        nome = r.get("name", "Ferramenta")
-        saida = r.get("output", "").strip()
+        nome = r.plugin_name
+        saida = r.raw_output.strip()
         pdf.set_fill_color(240, 240, 255)
         pdf.set_font("Helvetica", "B", 10)
         pdf.set_text_color(30, 30, 120)
@@ -53,10 +56,9 @@ def gerar_relatorio(alvo: str, resultados: list[dict]) -> str:
         for linha in linhas_validas:
             if linhas_impressas > 100:
                 pdf.set_text_color(200, 50, 50)
-                pdf.multi_cell(0, 5, txt=f"\n... ✂️ [Saída truncada no PDF. Verifique o arquivo .JSON ou .CSV para o log completo ({len(linhas_validas)} linhas originais)] ✂️ ...")
+                pdf.multi_cell(0, 5, txt=f"\n... ✂️ [Saída truncada no PDF] ✂️ ...")
                 break
             try:
-                # Wrap linhas gigantes no PDF (ex: hashs massivos, payload JS)
                 if len(linha) > 120:
                     linha = linha[:120] + "..."
                 pdf.multi_cell(0, 5, txt=linha)
@@ -64,20 +66,24 @@ def gerar_relatorio(alvo: str, resultados: list[dict]) -> str:
             except Exception:
                 pass
         pdf.ln(4)
+    
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    base_nome = f"colombo_{alvo.replace(' ', '_')[:30]}_{ts}"
+    alvo_safe = re.sub(r'[^a-zA-Z0-9.-]', '_', alvo).strip('_')[:30]
+    base_nome = f"colombo_{alvo_safe}_{ts}"
     caminho_pdf = os.path.join(PASTA_RELATORIOS, f"{base_nome}.pdf")
     pdf.output(caminho_pdf)
 
+    # JSON export with dict conversion
     caminho_json = os.path.join(PASTA_RELATORIOS, f"{base_nome}.json")
     with open(caminho_json, 'w', encoding='utf-8') as f_json:
-        json.dump(resultados, f_json, indent=4, ensure_ascii=False)
+        json.dump([asdict(r) for r in resultados], f_json, indent=4, ensure_ascii=False)
 
+    # CSV export
     caminho_csv = os.path.join(PASTA_RELATORIOS, f"{base_nome}.csv")
     with open(caminho_csv, 'w', encoding='utf-8', newline='') as f_csv:
         writer = csv.writer(f_csv)
-        writer.writerow(["Ferramenta", "Output RAW"])
+        writer.writerow(["Ferramenta", "Status", "Alvo", "Output RAW"])
         for r in resultados:
-            writer.writerow([r.get("name", "N/A"), r.get("output", "")])
+            writer.writerow([r.plugin_name, r.status, r.target, r.raw_output])
 
     return caminho_pdf

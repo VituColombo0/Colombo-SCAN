@@ -7,8 +7,10 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from core.database import (
-    create_case, list_cases, get_case, close_case, get_case_stats
+    create_case, list_cases, get_case, close_case, get_case_stats, delete_case
 )
+
+# ... (omitting top portion to directly target menu_gerenciar_cases instead via multi or exact start/end)
 from core.logger import get_logger
 
 log = get_logger("cases")
@@ -110,11 +112,12 @@ def menu_gerenciar_cases():
 
     console.print(table)
 
-    if cases:
+    if cases or closed_cases:
         acao = questionary.select(
             "Ação:",
             choices=[
-                questionary.Choice("🔒 Fechar um Case", value="close"),
+                questionary.Choice("🔒 Fechar um Case Ativo", value="close"),
+                questionary.Choice("🗑️ Deletar um Case Antigo", value="delete"),
                 questionary.Choice("⬅️ Voltar", value="back"),
             ]
         ).ask()
@@ -125,3 +128,12 @@ def menu_gerenciar_cases():
             if case_id:
                 close_case(case_id)
                 console.print(f"[yellow]🔒 Case #{case_id} fechado.[/yellow]")
+        elif acao == "delete" and (cases or closed_cases):
+            todos = cases + closed_cases
+            opcoes = [questionary.Choice(f"#{c['id']} — {c['name']}", value=c["id"]) for c in todos]
+            case_id = questionary.select("Qual case deseja DELETAR permanentemente?", choices=opcoes).ask()
+            if case_id:
+                confirm = questionary.confirm("Tem certeza que deseja deletar este case e TODOS os seus dados?").ask()
+                if confirm:
+                    delete_case(case_id)
+                    console.print(f"[red]🗑️ Case #{case_id} deletado permanentemente.[/red]")

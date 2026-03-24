@@ -12,6 +12,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.columns import Columns
+from core.entities import ScanResult
 
 from core.intelligence import extrair_insights, exibir_dashboard_inteligencia
 
@@ -126,21 +127,22 @@ def formatar_saida_terminal(texto: str) -> str:
     return "\n".join(novas_linhas)
 
 
-def exibir_resultados(resultados: list[dict]):
+def exibir_resultados(resultados: list[ScanResult]):
     """Displays formatted scan results with intelligence dashboard."""
+    from core.intelligence import extrair_insights, exibir_dashboard_inteligencia
     insights = extrair_insights(resultados)
     exibir_dashboard_inteligencia(insights)
 
     for r in resultados:
-        saida = r.get("output", "")
+        saida = r.raw_output
         if not saida:
             saida = "[dim italic]Nenhum dado retornado ou erro no plugin.[/dim italic]"
 
         painel = Panel(
             formatar_saida_terminal(str(saida)),
-            title=f"[white]🔍 Resultado: [bold cyan]{r['name']}[/bold cyan]",
+            title=f"[white]🔍 Resultado: [bold cyan]{r.plugin_name}[/bold cyan]",
             border_style="blue",
-            subtitle="[dim]Colombo Reporting Engine[/dim]"
+            subtitle=f"[dim]Time: {r.execution_time:.2f}s | Layer: {r.layer}[/dim]"
         )
         console.print(painel)
         console.print()
