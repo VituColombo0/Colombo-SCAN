@@ -1,39 +1,77 @@
+"""
+Colombo Scanner — Pre-Flight Health Check (Non-Blocking)
+Checks for required system dependencies but does NOT block the application.
+Returns status dict for the UI to display.
+"""
 import subprocess
-import sys
-from rich.console import Console
+from core.logger import get_logger
 
-console = Console()
+log = get_logger("health_check")
 
-def check_dependencies():
+
+def check_dependencies() -> dict:
     """
-    Realiza o Pre-Flight Health Check para garantir que os binários fundamentais 
-    do sistema estão presentes antes de iniciar a varredura paralela massiva.
+    Checks for Docker, curl, and jq.
+    Returns a dict with status of each dependency.
+    Does NOT call sys.exit() — the application continues even if deps are missing.
     """
-    faltantes = []
-    
+    status = {
+        "docker": {"ok": False, "msg": ""},
+        "curl": {"ok": False, "msg": ""},
+        "jq": {"ok": False, "msg": ""},
+    }
+
     # Check Docker
     try:
-        resultado = subprocess.run(["docker", "info"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if resultado.returncode != 0:
-            console.print("[red][!][/red] Docker não está rodando ou você não tem permissão.")
-            faltantes.append("docker-daemon")
+        resultado = subprocess.run(
+            ["docker", "info"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10
+        )
+        if resultado.returncode == 0:
+            status["docker"] = {"ok": True, "msg": "Operacional"}
+        else:
+            msg = "Docker não está rodando ou sem permissão"
+            status["docker"] = {"ok": False, "msg": msg}
+            log.warning(msg)
     except FileNotFoundError:
-        console.print("[red][!][/red] Binário do 'docker' não encontrado no sistema.")
-        faltantes.append("docker")
+        msg = "Binário 'docker' não encontrado no sistema"
+        status["docker"] = {"ok": False, "msg": msg}
+        log.warning(msg)
+    except subprocess.TimeoutExpired:
+        msg = "Docker info timeout — daemon pode estar travado"
+        status["docker"] = {"ok": False, "msg": msg}
+        log.warning(msg)
 
-    # Check curl (usado por muitos plugins web)
+    # Check curl
     try:
-        subprocess.run(["curl", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(["curl", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5)
+        status["curl"] = {"ok": True, "msg": "Operacional"}
     except FileNotFoundError:
-        faltantes.append("curl")
+        status["curl"] = {"ok": False, "msg": "Binário 'curl' não encontrado"}
+        log.warning("curl não encontrado")
+    except subprocess.TimeoutExpired:
+        status["curl"] = {"ok": False, "msg": "curl timeout"}
 
-    # Check jq (usado para parsear saídas JSON em bash)
+    # Check jq
     try:
-        subprocess.run(["jq", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(["jq", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5)
+        status["jq"] = {"ok": True, "msg": "Operacional"}
     except FileNotFoundError:
-        faltantes.append("jq")
+        status["jq"] = {"ok": False, "msg": "Binário 'jq' não encontrado"}
+        log.warning("jq não encontrado")
+    except subprocess.TimeoutExpired:
+        status["jq"] = {"ok": False, "msg": "jq timeout"}
 
-    if faltantes:
-        console.print(f"\n[bold red]Dependências críticas ausentes: {', '.join(faltantes)}[/bold red]")
-        console.print("Por favor, instale ou ative esses serviços antes de iniciar o Colombo Scanner.")
-        sys.exit(1)
+    return status
+
+
+def format_status_for_banner(status: dict) -> str:
+    """Returns a Rich-formatted string for the banner status display."""
+    docker_status = status.get("docker", {})
+    if docker_status.get("ok"):
+        return "[bold green]● Connected[/bold green]"
+    else:
+        return f"[bold red]● Offline[/bold red] [dim]({docker_status.get('msg', '?')})[/dim]"

@@ -1,7 +1,7 @@
-relatorios/
-__pycache__/
 .venv/
+__pycache__/
 *.pyc
-*.pyo
 .env
-*.tmp
+data/
+logs/
+relatorios/
