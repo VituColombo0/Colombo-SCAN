@@ -1,6 +1,6 @@
 """
-Colombo Scanner v4.0 — Visual Components
-Banner e formatação clássica.
+Colombo Scanner v4.1 — Visual Components
+Banner, tutorial e formatação clássica.
 """
 import sys
 import platform
@@ -12,15 +12,32 @@ from rich.columns import Columns
 
 console = Console()
 
+_cached_docker_status = None
+
+def _get_docker_status():
+    """Cached Docker status to avoid blocking on every banner render."""
+    global _cached_docker_status
+    if _cached_docker_status is not None:
+        return _cached_docker_status
+    try:
+        from core.health_check import check_dependencies, format_status_for_banner
+        dep_status = check_dependencies()
+        _cached_docker_status = format_status_for_banner(dep_status)
+    except Exception:
+        _cached_docker_status = "[dim]? (não verificado)[/dim]"
+    return _cached_docker_status
+
 def print_banner(plugin_count: int = 0):
-    """Renders the styled dashboard header."""
+    """Renders the styled dashboard header with real Docker status (cached)."""
+    docker_display = _get_docker_status()
+
     stats = Table.grid(padding=(0, 1))
     stats.add_column(style="cyan", justify="right")
     stats.add_column(style="white")
     stats.add_row("OS:", f"{platform.system()} {platform.release()}")
     stats.add_row("Python:", sys.version.split()[0])
     stats.add_row("Plugins:", f"[bold green]{plugin_count}[/bold green] ativos")
-    stats.add_row("Docker:", "[bold sky_blue1]Connected[/bold sky_blue1]")
+    stats.add_row("Docker:", docker_display)
 
     heart = "".join(random.choice(["❤️", "💙", "💚", "💛"]) for _ in range(3))
     stats.add_row("Heartbeat:", heart)
@@ -34,16 +51,16 @@ def print_banner(plugin_count: int = 0):
             Panel(stats, title="[dim]Status[/dim]", border_style="cyan")
         ]),
         border_style="magenta",
-        title="[bold white]V4.0 TERMINAL PRO[/bold white]"
+        title="[bold white]V4.1 TERMINAL PRO[/bold white]"
     ))
 
 
 def exibir_tutorial():
-    """Shows the original operational manual."""
+    """Shows the operational manual styled panels."""
     man_auto = (
         "[bold cyan]🎯 Investigação Automática[/bold cyan]\n"
         "Junta o melhor dos dois mundos. Você cola os dados (um ou vários, "
-        "separados por vírgula), e o sistema detecta os tipos e roda as ferramentas corretas.\n"
+        "em qualquer formato), e o sistema detecta os tipos e roda as ferramentas corretas.\n"
         "Você também pode escolher 'aprofundar' (Workflow), onde o sistema pega tudo novo que achou "
         "e investiga automaticamente em sucessivas camadas."
     )
@@ -51,9 +68,10 @@ def exibir_tutorial():
         "[bold green]🧩 Modo Manual[/bold green]\n"
         "Acesso total ao nosso arsenal de ferramentas organizadas por categoria. "
         "Use para investigações cirúrgicas em infraestrutura, redes sociais ou dark web.\n"
-        "[dim]Dica: Aqui também aceita múltiplos alvos separados por vírgula![/dim]"
+        "Use '🔥 Executar Todas' para rodar todas as ferramentas de uma vez.\n"
+        "[dim]Dica: O Smart Parser aceita qualquer formato de dado![/dim]"
     )
-    
+
     console.print(Panel(
         Columns([
             Panel(man_auto, title="1. Auto-Investigador", border_style="cyan", width=40),
@@ -68,6 +86,10 @@ def formatar_saida_terminal(texto: str) -> str:
     """Formats raw tool output for terminal display with truncation."""
     if not texto:
         return "[italic dim]Nenhum dado retornado pela ferramenta.[/italic dim]"
+
+    # Detect HTML response (likely WAF/captcha block)
+    if ("<html" in texto.lower() or "<!doctype" in texto.lower()) and len(texto) > 1000:
+        texto = "⚠️ [Aviso] A ferramenta retornou uma página HTML inteira (possível bloqueio via Captcha/WAF).\n" + texto
 
     linhas = [l for l in texto.split("\n") if l.strip()]
     novas_linhas = []
