@@ -1,4 +1,4 @@
-"""
+﻿"""
 Colombo Scanner — Recursive Workflow Engine
 Runs plugins for a target, extracts new leads from output, and investigates recursively.
 Enhanced with entity extraction and persistence.
@@ -11,6 +11,8 @@ from rich.console import Console
 
 log = get_logger("workflow")
 console = Console()
+
+MAX_LEADS_PER_LAYER = 20  # Limite de novas pistas por camada para evitar explosão
 
 from core.entities import ScanResult, EntityType
 
