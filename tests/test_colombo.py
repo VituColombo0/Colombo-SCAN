@@ -23,27 +23,27 @@ class TestSecurity:
 
     def test_sanitize_blocks_semicolon(self):
         from core.runner import sanitize_input
-        with pytest.raises(ValueError, match="caracteres não permitidos"):
+        with pytest.raises(ValueError, match="Caracteres perigosos"):
             sanitize_input("; rm -rf /")
 
     def test_sanitize_blocks_pipe(self):
         from core.runner import sanitize_input
-        with pytest.raises(ValueError, match="caracteres não permitidos"):
+        with pytest.raises(ValueError, match="Caracteres perigosos"):
             sanitize_input("test | cat /etc/passwd")
 
     def test_sanitize_blocks_backtick(self):
         from core.runner import sanitize_input
-        with pytest.raises(ValueError, match="caracteres não permitidos"):
+        with pytest.raises(ValueError, match="Caracteres perigosos"):
             sanitize_input("`whoami`")
 
     def test_sanitize_blocks_dollar(self):
         from core.runner import sanitize_input
-        with pytest.raises(ValueError, match="caracteres não permitidos"):
+        with pytest.raises(ValueError, match="Caracteres perigosos"):
             sanitize_input("$(whoami)")
 
     def test_sanitize_blocks_ampersand(self):
         from core.runner import sanitize_input
-        with pytest.raises(ValueError, match="caracteres não permitidos"):
+        with pytest.raises(ValueError, match="Caracteres perigosos"):
             sanitize_input("test && rm -rf /")
 
     def test_sanitize_blocks_long_input(self):
@@ -257,6 +257,7 @@ class TestSmartScan:
     def test_detect_cnpj(self):
         from core.smart_scan import detectar_tipo
         assert detectar_tipo("12.345.678/0001-90") == "cnpj"
+
 class TestMonitor:
     """Tests for the Continuous Monitoring (Watchdog) engine."""
 
