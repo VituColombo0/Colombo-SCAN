@@ -322,6 +322,16 @@ def get_raw_results_by_scan(scan_id: int) -> list[dict]:
     conn.close()
     return [dict(r) for r in rows]
 
+def check_cache_result(plugin_name: str, target: str, hours: int = 24) -> Optional[dict]:
+    """Verifica se um resultado de sucesso já existe no banco para o plugin/alvo nas últimas N horas."""
+    conn = get_connection()
+    row = conn.execute(
+        f"SELECT * FROM raw_results WHERE plugin_name = ? AND target = ? AND status = 'success' AND created_at >= datetime('now', '-{hours} hours') ORDER BY created_at DESC LIMIT 1",
+        (plugin_name, target)
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
 
 # --- Stats ---
 

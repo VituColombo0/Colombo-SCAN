@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from rich.console import Console
 from core.logger import get_logger
 from core.entities import ScanResult
+from core.database import check_cache_result
 
 load_dotenv()
 log = get_logger("runner")
@@ -65,6 +66,18 @@ def _executar_um(plugin: dict, inputs: dict) -> ScanResult:
     timeout = plugin.get("timeout", 300)
     alvo = inputs.get("alvo", "unknown")
     start_time = time.time()
+
+    cached = check_cache_result(plugin_name, alvo, hours=24)
+    if cached:
+        log.info(f"[CACHE HIT] {plugin_name} para {alvo}")
+        return ScanResult(
+            plugin_name=plugin_name,
+            target=alvo,
+            raw_output=cached["output"],
+            status="success (cached)",
+            execution_time=0.0,
+            layer=inputs.get("camada", 1)
+        )
 
     try:
         inputs_tratados = {k: sanitize_input(str(v)) for k, v in inputs.items()}

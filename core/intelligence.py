@@ -18,9 +18,9 @@ PATTERNS = {
     EntityType.EMAIL: r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
     EntityType.IP: r'\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b',
     EntityType.DOMAIN: r'(?<!@)\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b',
-    EntityType.PHONE: r'(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?9?\d{4}[-.\s]?\d{4}',
+    EntityType.PHONE: r'(?:\+?\d{1,3}[\s.-]?)?(?:\(?\d{2,4}\)?[\s.-]?)?\d{3,5}[\s.-]?\d{4}',
     EntityType.URL: r'https?://[^\s"\'<>]+',
-    EntityType.USERNAME: r'(?<![\w.-])@([\w._]{3,30})',
+    EntityType.USERNAME: r'(?<![\w.-])@([a-zA-Z0-9._-]{3,30})',
     EntityType.HASH: r'\b[a-fA-F0-9]{32,64}\b',
     EntityType.CRYPTO_WALLET: r'\b(?:bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}\b|0x[a-fA-F0-9]{40}',
 }
@@ -41,6 +41,10 @@ IGNORE_DOMAINS = {"example.com", "localhost", "github.com", "docker.com", "googl
                   "schemas.microsoft.com", "w3.org", "w.org", "purl.org"}
 IGNORE_EMAILS = {"noreply@", "no-reply@", "postmaster@", "mailer-daemon@", "admin@", "test@"}
 
+def strip_ansi(texto: str) -> str:
+    """Removes terminal color codes before regex processing."""
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', texto)
 
 def extrair_entidades(texto: str, source_tool: str = "", source_target: str = "") -> list[Entity]:
     """
@@ -50,6 +54,7 @@ def extrair_entidades(texto: str, source_tool: str = "", source_target: str = ""
     if not isinstance(texto, str) or not texto.strip():
         return []
 
+    texto = strip_ansi(texto)
     entities = []
     seen = set()
 
@@ -78,9 +83,11 @@ def extrair_entidades(texto: str, source_tool: str = "", source_target: str = ""
             
             if entity_type == EntityType.PHONE:
                 digits = re.sub(r'\D', '', value)
-                if len(digits) < 10:
+                if len(digits) < 7 or len(digits) > 15:
                     continue
-                value = digits
+                # Normalize phone formats roughly. We don't overwrite if it looks international.
+                value = f"+{digits}" if not value.startswith('+') and len(digits) >= 10 and not digits.startswith('55') else digits
+
             
             if entity_type == EntityType.HASH:
                 # Skip if it looks like a common hex string (not a real hash)
@@ -147,10 +154,19 @@ def extrair_insights(resultados: List[ScanResult]) -> Dict[str, Any]:
     correlacoes = []
     for value, tools in entity_sources.items():
         if len(tools) > 1:
+            # Score de Centralidade e Risco
+            e_type = next((e.type for e in all_entities if e.value == value), EntityType.UNKNOWN)
+            source_targets = {e.source_target for e in all_entities if e.value == value and e.source_target}
+            
+            # Matématica Básica: 1 Ponto por ferramenta + 2 pontos por cada origem cruzada diferente
+            score = len(tools) + (len(source_targets) * 2) 
+            
             correlacoes.append({
                 "value": value,
+                "type": e_type,
                 "tools": list(tools),
-                "score": len(tools)
+                "source_targets": list(source_targets),
+                "score": score
             })
     correlacoes.sort(key=lambda x: x["score"], reverse=True)
 
@@ -221,20 +237,26 @@ def exibir_dashboard_inteligencia(insights: Dict[str, Any]):
     # Correlation highlights
     if correlacoes:
         corr_table = Table(
-            title="🔥 Correlações (mesmo dado em múltiplas fontes)",
+            title="🔥 Correlações e Nós Centrais",
             show_header=True,
             header_style="bold yellow",
             expand=True
         )
+        corr_table.add_column("Score", style="bold yellow", width=10, justify="center")
         corr_table.add_column("Valor", style="white")
-        corr_table.add_column("Score", style="bold yellow", width=8, justify="center")
-        corr_table.add_column("Fontes", style="dim")
+        corr_table.add_column("Fontes (Ferramentas)", style="dim")
+        corr_table.add_column("Origens Cruzadas", style="cyan")
 
         for c in correlacoes[:10]:
+            is_central = c["score"] >= 5
+            score_text = f"🚨 [red]{c['score']}[/red]" if is_central else f"⭐ {c['score']}"
+            valor_text = f"[bold red]{c['value'][:50]}[/bold red]" if is_central else c["value"][:50]
+            
             corr_table.add_row(
-                c["value"][:50],
-                f"⭐ {c['score']}",
-                ", ".join(c["tools"][:4])
+                score_text,
+                valor_text,
+                ", ".join(c["tools"][:4]),
+                str(len(c["source_targets"])) + " origens"
             )
 
         console.print(Panel(corr_table, border_style="yellow"))

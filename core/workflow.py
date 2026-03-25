@@ -24,7 +24,7 @@ def executar_workflow_recursivo(alvo_inicial: str, plugins_disponiveis: list,
     """
     resultados_totais: list[ScanResult] = []
     alvos_processados = set()
-    alvos_fila = {alvo_inicial}
+    alvos_fila = {alvo_inicial: ("Manual/Arquivo", "Input Inicial")}  # Dict: alvo -> (source_tool, source_target)
 
     for camada in range(1, max_camadas + 1):
         if not alvos_fila:
@@ -33,10 +33,10 @@ def executar_workflow_recursivo(alvo_inicial: str, plugins_disponiveis: list,
         if verbose:
             console.print(f"\n[bold blue][WORKFLOW][/bold blue] Iniciando Camada {camada} com {len(alvos_fila)} alvo(s).")
 
-        alvos_camada_seguinte = set()
+        alvos_camada_seguinte = {}  # type: dict[str, tuple[str, str]]
         leads_count = 0
 
-        for alvo in alvos_fila:
+        for alvo, source_info in alvos_fila.items():
             if alvo in alvos_processados:
                 continue
 
@@ -44,7 +44,10 @@ def executar_workflow_recursivo(alvo_inicial: str, plugins_disponiveis: list,
             tipo_alvo = detectar_tipo(alvo)
 
             if verbose:
-                console.print(f"[cyan]➜ Investigando:[/cyan] {alvo} ({tipo_alvo})")
+                if source_info[0] == "Manual/Arquivo":
+                    console.print(f"[cyan]➜ Investigando:[/cyan] {alvo} ({tipo_alvo})")
+                else:
+                    console.print(f"[cyan]➜ Investigando:[/cyan] {alvo} ({tipo_alvo}) [dim](Encontrado via {source_info[0]} em {source_info[1]})[/dim]")
 
             plugins_roda = filtrar_plugins_smart(plugins_disponiveis, alvo)
             if not plugins_roda:
@@ -69,7 +72,7 @@ def executar_workflow_recursivo(alvo_inicial: str, plugins_disponiveis: list,
                         val = e.value
                         if val not in alvos_processados and val not in alvos_camada_seguinte and len(val) > 3:
                             if leads_count < MAX_LEADS_PER_LAYER:
-                                alvos_camada_seguinte.add(val)
+                                alvos_camada_seguinte[val] = (r.plugin_name, alvo)
                                 novas_pistas_alvo += 1
                                 leads_count += 1
 

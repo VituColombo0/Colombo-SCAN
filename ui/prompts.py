@@ -111,11 +111,23 @@ def escolher_plugins_manual(categorias: dict) -> list:
     ).ask() or []
 
 
-def perguntar_alvos(prompt_text: str = "Alvo(s) (qualquer formato — o sistema detecta automaticamente):") -> tuple[list[str], list[ParsedInput]]:
+def perguntar_alvos(prompt_text: str = "Alvo(s) (ou caminho para um arquivo .txt com alvos):") -> tuple[list[str], list[ParsedInput]]:
     """Pergunta os alvos e faz parse inteligente. Retorna (lista_alvos, parsed_inputs)."""
     raw = questionary.text(prompt_text).ask()
     if not raw:
         return [], []
+
+    # Se a entrada for um arquivo existente, lê o conteúdo
+    import os
+    if os.path.isfile(raw.strip()):
+        try:
+            with open(raw.strip(), 'r', encoding='utf-8') as f:
+                content = f.read()
+                console.print(f"[dim]Lendo {len(content)} caracteres do arquivo {raw.strip()}...[/dim]")
+                raw = content
+        except Exception as e:
+            console.print(f"[red]Erro ao ler o arquivo {raw.strip()}: {e}[/red]")
+            return [], []
 
     parsed = parse_input_livre(raw)
 
