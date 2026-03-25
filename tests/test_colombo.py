@@ -293,3 +293,129 @@ class TestMonitor:
     def test_format_details_empty(self):
         from core.monitor import formatar_detalhes_entidades
         assert "Nenhuma pista" in formatar_detalhes_entidades([])
+
+
+class TestInputParser:
+    """Tests for the Smart Input Parser module."""
+
+    def test_normalize_phone_clean(self):
+        from core.input_parser import normalizar_telefone
+        assert normalizar_telefone("5535999453863") == "5535999453863"
+
+    def test_normalize_phone_with_plus_spaces(self):
+        from core.input_parser import normalizar_telefone
+        assert normalizar_telefone("+55 35 999343863") == "5535999343863"
+
+    def test_normalize_phone_with_hyphens(self):
+        from core.input_parser import normalizar_telefone
+        assert normalizar_telefone("35 99945-3863") == "35999453863"
+
+    def test_normalize_phone_with_parens(self):
+        from core.input_parser import normalizar_telefone
+        assert normalizar_telefone("(35) 99945-3863") == "35999453863"
+
+    def test_normalize_email(self):
+        from core.input_parser import normalizar_email
+        assert normalizar_email("  User@GMAIL.com  ") == "user@gmail.com"
+
+    def test_normalize_cpf(self):
+        from core.input_parser import normalizar_cpf
+        assert normalizar_cpf("123.456.789-00") == "12345678900"
+
+    def test_normalize_cnpj(self):
+        from core.input_parser import normalizar_cnpj
+        assert normalizar_cnpj("12.345.678/0001-90") == "12345678000190"
+
+    def test_normalize_nome(self):
+        from core.input_parser import normalizar_nome
+        assert normalizar_nome("  joão   silva  ") == "João Silva"
+
+    def test_parse_single_email(self):
+        from core.input_parser import parse_input_livre
+        result = parse_input_livre("joao@gmail.com")
+        assert len(result) == 1
+        assert result[0].tipo == "email"
+        assert result[0].valor_normalizado == "joao@gmail.com"
+
+    def test_parse_single_phone(self):
+        from core.input_parser import parse_input_livre
+        result = parse_input_livre("+55 35 999343863")
+        assert len(result) >= 1
+        phone_results = [r for r in result if r.tipo == "telefone"]
+        assert len(phone_results) >= 1
+        assert "5535999343863" in phone_results[0].valor_normalizado
+
+    def test_parse_mixed_input_comma(self):
+        from core.input_parser import parse_input_livre
+        result = parse_input_livre("joao@gmail.com, +5511999998888")
+        tipos = [r.tipo for r in result]
+        assert "email" in tipos
+        assert "telefone" in tipos
+
+    def test_parse_ip(self):
+        from core.input_parser import parse_input_livre
+        result = parse_input_livre("192.168.1.1")
+        assert len(result) == 1
+        assert result[0].tipo == "ip"
+
+    def test_parse_domain(self):
+        from core.input_parser import parse_input_livre
+        result = parse_input_livre("example.com")
+        assert len(result) == 1
+        assert result[0].tipo == "dominio"
+
+    def test_parse_empty_input(self):
+        from core.input_parser import parse_input_livre
+        assert parse_input_livre("") == []
+        assert parse_input_livre("   ") == []
+
+    def test_parse_username_fallback(self):
+        from core.input_parser import parse_input_livre
+        result = parse_input_livre("john_doe")
+        assert len(result) == 1
+        assert result[0].tipo == "username"
+
+    def test_parse_nome_composto(self):
+        from core.input_parser import parse_input_livre
+        result = parse_input_livre("João Silva")
+        assert len(result) == 1
+        assert result[0].tipo == "nome"
+        assert result[0].valor_normalizado == "João Silva"
+
+    def test_adaptar_telefone_para_plugin(self):
+        from core.input_parser import adaptar_para_plugin, ParsedInput
+        parsed = ParsedInput(
+            valor_original="+55 35 999343863",
+            valor_normalizado="5535999343863",
+            tipo="telefone"
+        )
+        plugin = {"name": "PhoneInfoga", "category": "📱 Inteligência de Telefones"}
+        resultado = adaptar_para_plugin(parsed, plugin)
+        assert resultado.startswith("+")
+
+    def test_adaptar_email_para_plugin(self):
+        from core.input_parser import adaptar_para_plugin, ParsedInput
+        parsed = ParsedInput(
+            valor_original="User@Gmail.COM",
+            valor_normalizado="user@gmail.com",
+            tipo="email"
+        )
+        plugin = {"name": "Mosint", "category": "📧 Análise de Emails"}
+        resultado = adaptar_para_plugin(parsed, plugin)
+        assert resultado == "user@gmail.com"
+
+    def test_formatar_resumo_alvos(self):
+        from core.input_parser import formatar_resumo_alvos, ParsedInput
+        parsed = [
+            ParsedInput("test@test.com", "test@test.com", "email"),
+            ParsedInput("11999998888", "11999998888", "telefone"),
+        ]
+        resumo = formatar_resumo_alvos(parsed)
+        assert "Email" in resumo
+        assert "Telefone" in resumo
+        assert "test@test.com" in resumo
+
+    def test_formatar_resumo_vazio(self):
+        from core.input_parser import formatar_resumo_alvos
+        resumo = formatar_resumo_alvos([])
+        assert "Nenhum" in resumo

@@ -1,6 +1,6 @@
 """
-Colombo Scanner v4.0 — Main Entry Point
-Modos clássicos com opção inteligente de multi-alvos.
+Colombo Scanner v4.1 — Main Entry Point
+Modos clássicos com Smart Input Parser e opção "Executar Todas".
 """
 import argparse
 import sys
@@ -12,9 +12,10 @@ from core.report import gerar_relatorio
 from core.graph import gerar_grafo
 from core.cases import selecionar_ou_criar_case, menu_gerenciar_cases
 from core.health_check import check_dependencies
+from core.input_parser import adaptar_para_plugin
 
 def main():
-    parser = argparse.ArgumentParser(description="Colombo Scanner v4.0")
+    parser = argparse.ArgumentParser(description="Colombo Scanner v4.1")
     parser.add_argument("--alvo", help="Alvo para varredura silenciosa")
     args = parser.parse_args()
 
@@ -41,17 +42,18 @@ def main():
 
         if escolha in ["auto", "manual"]:
             alvos = []
+            parsed_inputs = []
             resultados = []
 
             if escolha == "auto":
-                alvos = perguntar_alvos("Alvo(s) (para vários, separe por vírgula):")
+                alvos, parsed_inputs = perguntar_alvos("Alvo(s) (qualquer formato — o sistema detecta automaticamente):")
                 if not alvos: continue
-                
+
                 params = perguntar_parametros_auto()
-                
+
                 resultados = engine.run_multi_target_scan(
-                    alvos, 
-                    case_id=case_id, 
+                    alvos,
+                    case_id=case_id,
                     aprofundar=params["aprofundar"],
                     layers=params["layers"]
                 )
@@ -62,26 +64,38 @@ def main():
                 for p in engine.plugins:
                     cat = p.get("category", "Outros")
                     cats.setdefault(cat, []).append(p)
-                
+
                 plugins_selecionados = escolher_plugins_manual(cats)
                 if not plugins_selecionados: continue
-                
-                alvos = perguntar_alvos("Alvo(s) para ferramentas selecionadas:")
+
+                alvos, parsed_inputs = perguntar_alvos("Alvo(s) para ferramentas selecionadas:")
                 if not alvos: continue
-                
-                if len(alvos) > 1:
-                    # Roda manual para cada alvo (a funcao atual run_manual_scan so aceita 1 target dicio)
-                    for a in alvos:
-                        res = engine.run_manual_scan(plugins_selecionados, {"alvo": a}, case_id=case_id)
-                        resultados.extend(res)
+
+                if parsed_inputs:
+                    # Smart mode: adapta cada alvo para cada plugin
+                    for parsed in parsed_inputs:
+                        for plugin in plugins_selecionados:
+                            valor_adaptado = adaptar_para_plugin(parsed, plugin)
+                            res = engine.run_manual_scan(
+                                [plugin],
+                                {"alvo": valor_adaptado},
+                                case_id=case_id
+                            )
+                            resultados.extend(res)
                 else:
-                    resultados = engine.run_manual_scan(plugins_selecionados, {"alvo": alvos[0]}, case_id=case_id)
-            
+                    # Fallback clássico (input não parseado)
+                    if len(alvos) > 1:
+                        for a in alvos:
+                            res = engine.run_manual_scan(plugins_selecionados, {"alvo": a}, case_id=case_id)
+                            resultados.extend(res)
+                    else:
+                        resultados = engine.run_manual_scan(plugins_selecionados, {"alvo": alvos[0]}, case_id=case_id)
+
             if resultados:
                 exibir_resultados(resultados)
-                
+
                 alvo_nome = alvos[0] if len(alvos) == 1 else f"Multi-{len(alvos)}-alvos"
-                
+
                 # Exportações
                 exports = menu_exportacao(alvo_nome)
                 if exports:
@@ -91,7 +105,7 @@ def main():
                     if "grafo" in exports:
                         path = gerar_grafo(alvo_nome, resultados)
                         console.print(f"[green]✅ Grafo salvo em {path}[/green]")
-                
+
                 input("\nPressione ENTER para continuar...")
 
 if __name__ == "__main__":

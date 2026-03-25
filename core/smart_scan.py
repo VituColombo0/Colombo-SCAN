@@ -1,4 +1,5 @@
 import re
+from core.input_parser import normalizar_telefone
 
 MAPA_TIPOS = {
     "email":    ["📧 Análise de Emails", "👤 Identidades e Usernames", "🔍 Inteligência de Busca"],
@@ -11,6 +12,8 @@ MAPA_TIPOS = {
     "video":    ["🎙️ Áudio e Vídeo Forense"],
     "audio":    ["🎙️ Áudio e Vídeo Forense"],
     "username": ["👤 Identidades e Usernames", "📧 Análise de Emails", "🔐 Vazamentos Profundos", "🔍 Inteligência de Busca"],
+    "nome":     ["👤 Identidades e Usernames", "🔍 Inteligência de Busca"],
+    "cpf":      ["👤 Identidades e Usernames", "🔍 Inteligência de Busca"],
     "github":   ["🔒 DevSecOps & Repositories", "🔐 Vazamentos Profundos", "👤 Identidades e Usernames"],
     "cripto":   ["💰 Rastreio de Criptomoedas", "🔐 Vazamentos Profundos"],
     "dominio":  ["🕸️ Attack Surface Mapping", "🌐 Redes e IPs", "🌍 Geolocalização", "💻 IoT e Dispositivos", "🔍 Inteligência de Busca", "🔐 Vazamentos Profundos"],
@@ -34,10 +37,16 @@ def detectar_tipo(alvo: str) -> str:
     if re.match(r'^[\w.+-]+@[\w-]+\.[a-z]{2,}$', a):
         return "email"
 
-    if re.match(r'^\+?[\d\s\-\(\)]{7,16}$', a):
+    # Telefone: normaliza removendo espaços/hífens/parênteses e verifica
+    digits = normalizar_telefone(a)
+    if re.match(r'^[\+\d\s\-\(\)]{7,20}$', a) and 7 <= len(digits) <= 15:
         return "telefone"
+
     if re.match(r'^\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}$', a):
         return "cnpj"
+    # CPF
+    if re.match(r'^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$', a):
+        return "cpf"
     if re.match(r'^[a-z]{3}-?\d[a-z\d]\d{2}$', a):
         return "placa"
     if re.match(r'^([0-9a-f]{2}[:-]){5}([0-9a-f]{2})$', a):
