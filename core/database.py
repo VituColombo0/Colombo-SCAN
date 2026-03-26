@@ -322,6 +322,19 @@ def get_raw_results_by_scan(scan_id: int) -> list[dict]:
     conn.close()
     return [dict(r) for r in rows]
 
+def get_raw_results_by_case(case_id: int) -> list[dict]:
+    """Recupera todos os resultados cruzados na linha do tempo para gerar Dossiês unindo múltiplas varreduras."""
+    conn = get_connection()
+    rows = conn.execute(
+        '''SELECT r.* FROM raw_results r 
+           JOIN scans s ON r.scan_id = s.id 
+           WHERE s.case_id = ? 
+           ORDER BY r.created_at''',
+        (case_id,)
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
 def check_cache_result(plugin_name: str, target: str, hours: int = 24) -> Optional[dict]:
     """Verifica se um resultado de sucesso já existe no banco para o plugin/alvo nas últimas N horas."""
     conn = get_connection()

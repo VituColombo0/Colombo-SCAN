@@ -78,7 +78,7 @@ def gerar_grafo(alvo: str, resultados: list[ScanResult]) -> str:
     with open(template_path, 'r', encoding='utf-8') as f:
         template = f.read()
 
-    html = template.replace("{alvo}", html.escape(alvo)) \
+    html_content = template.replace("{alvo}", html.escape(alvo)) \
                    .replace("{nodes}", json.dumps(nos)) \
                    .replace("{edges}", json.dumps(arestas))
 
@@ -89,6 +89,6 @@ def gerar_grafo(alvo: str, resultados: list[ScanResult]) -> str:
     caminho = os.path.join(PASTA_RELATORIOS, nome)
 
     with open(caminho, 'w', encoding='utf-8') as f:
-        f.write(html)
+        f.write(html_content)
 
     return caminho

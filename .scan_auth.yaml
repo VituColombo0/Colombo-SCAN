@@ -1,0 +1,8 @@
+# COLOMBO SCANNER - Gerenciador Universal de Sessoes (Shadow Auth)
+# Insira seus cookies e tokens aqui. 
+# Eles serao injetados ENVIROMENT VARIABLES diretamente no shell/docker dos plugins.
+
+github_token: 'ghp_xxxxxx'
+instagram_sessionid: 'xxxxxx'
+twitter_auth_token: 'xxxxxx'
+shodan_api_key: 'xxxxxx'

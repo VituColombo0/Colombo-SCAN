@@ -17,7 +17,8 @@ def menu_principal() -> str:
         choices=[
             {"name": "🎯 Investigação Automática (Inteligente)", "value": "auto"},
             {"name": "🧩 Modo Manual (Escolher Ferramentas)", "value": "manual"},
-            {"name": "📂 Gerenciar Cases (Histórico)", "value": "cases"},
+            {"name": "📖 Ver Histórico de Descobertas do Caso Atual", "value": "historico"},
+            {"name": "📂 Gerenciar Cases (Global)", "value": "cases"},
             {"name": "💡 Tutorial / Ajuda", "value": "tutorial"},
             {"name": "❌ Sair", "value": "sair"}
         ],
