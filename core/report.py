@@ -4,8 +4,11 @@ from fpdf import FPDF
 import datetime
 import os
 import re
+import html
 from dataclasses import asdict
 from core.entities import ScanResult
+from core.intelligence import extrair_insights
+from core.dorks import generate_dorks
 
 PASTA_RELATORIOS = "relatorios"
 os.makedirs(PASTA_RELATORIOS, exist_ok=True)
@@ -85,5 +88,53 @@ def gerar_relatorio(alvo: str, resultados: list[ScanResult]) -> str:
         writer.writerow(["Ferramenta", "Status", "Alvo", "Output RAW"])
         for r in resultados:
             writer.writerow([r.plugin_name, r.status, r.target, r.raw_output])
+
+    # Exportação HTML Inteligente
+    insights = extrair_insights(resultados)
+    html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Dossiê OSINT - {alvo}</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; background: #0a0a0a; color: #f0f0f0; margin: 20px; }}
+        h1, h2, h3 {{ color: #00d2ff; }}
+        .header {{ border-bottom: 2px solid #00d2ff; padding-bottom: 10px; margin-bottom: 20px; }}
+        .card {{ background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #333; }}
+        .central-node {{ border-left: 4px solid #ff3333; }}
+        .dork-list {{ background: #222; padding: 10px; border-radius: 5px; }}
+        pre {{ white-space: pre-wrap; word-wrap: break-word; font-size: 11px; color: #aaa; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SCAN OSINT Dossier</h1>
+        <p><strong>Alvo Principal:</strong> {alvo}</p>
+        <p><strong>Data:</strong> {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
+    </div>
+
+    <h2>🚨 Nós Centrais (Grau de Risco Elevado)</h2>
+    """
+    for c in insights["correlacoes"][:10]:
+        if c["score"] >= 5:
+            html_content += f'<div class="card central-node"><h3>{c["value"]} (Score: {c["score"]})</h3>'
+            # Gerar Dorks
+            dorks = generate_dorks(c["value"], c["type"])
+            if dorks:
+                html_content += "<h4>Google Dorks Sugeridos:</h4><ul>"
+                for d in dorks:
+                    html_content += f'<li><a href="{d["url"]}" target="_blank" style="color: #ff9900;">{d["title"]}</a> - <code>{d["query"]}</code></li>'
+                html_content += "</ul>"
+            html_content += "</div>"
+            
+    html_content += "<h2>Resultados Brutos por Ferramenta</h2>"
+    for r in resultados:
+        html_content += f'<div class="card"><h3>{r.plugin_name}</h3><pre>{html.escape(r.raw_output)}</pre></div>'
+        
+    html_content += "</body></html>"
+    
+    caminho_html = os.path.join(PASTA_RELATORIOS, f"{base_nome}.html")
+    with open(caminho_html, 'w', encoding='utf-8') as f_html:
+        f_html.write(html_content)
 
     return caminho_pdf

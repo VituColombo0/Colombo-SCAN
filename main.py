@@ -99,9 +99,9 @@ def main():
                 # Exportações
                 exports = menu_exportacao(alvo_nome)
                 if exports:
-                    if any(x in exports for x in ["pdf", "json", "csv"]):
+                    if any(x in exports for x in ["pdf", "json", "csv", "html"]):
                         path = gerar_relatorio(alvo_nome, resultados)
-                        console.print(f"[green]✅ Relatório salvo em {path}[/green]")
+                        console.print(f"[green]✅ Relatório (incluindo HTML/PDF) salvo na pasta relatorios/[/green]")
                     if "grafo" in exports:
                         path = gerar_grafo(alvo_nome, resultados)
                         console.print(f"[green]✅ Grafo salvo em {path}[/green]")

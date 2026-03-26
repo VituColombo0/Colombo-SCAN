@@ -14,6 +14,7 @@ from rich.console import Console
 from core.logger import get_logger
 from core.entities import ScanResult
 from core.database import check_cache_result
+from core.auth_manager import get_auth_env
 
 load_dotenv()
 log = get_logger("runner")
@@ -88,11 +89,24 @@ def _executar_um(plugin: dict, inputs: dict) -> ScanResult:
     if error:
         return ScanResult(plugin_name=plugin_name, target=alvo, raw_output=error, status="skipped")
 
+    # Shadow Auth Injection
+    env_merged = os.environ.copy()
+    for auth_k, auth_v in get_auth_env().items():
+        env_merged[auth_k.upper()] = str(auth_v)
+
     last_output = ""
     status = "error"
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            proc = subprocess.run(cmd, shell=True, capture_output=True, timeout=timeout, text=True, errors='replace')
+            proc = subprocess.run(
+                cmd, 
+                shell=True, 
+                capture_output=True, 
+                timeout=timeout, 
+                text=True, 
+                errors='replace',
+                env=env_merged
+            )
             last_output = (proc.stdout or "") + (proc.stderr or "")
             if proc.returncode == 0:
                 status = "success"

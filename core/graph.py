@@ -8,12 +8,16 @@ PASTA_RELATORIOS = "relatorios"
 os.makedirs(PASTA_RELATORIOS, exist_ok=True)
 
 from core.entities import ScanResult
+from core.intelligence import extrair_insights
 
 def _extrair_nos_arestas(alvo: str, resultados: list[ScanResult]) -> tuple[list, list]:
     """
-    parse basico nos resultados pra achar emails, IPs, usuarios e URLs
-    e montar os nos e arestas do grafo
+    parse basico nos resultados e cruza com os insights de centralidade
+    pra montar os nos e arestas do grafo
     """
+    insights = extrair_insights(resultados)
+    central_nodes = {c["value"]: c["score"] for c in insights["correlacoes"] if c["score"] >= 5}
+
     nos = [{"id": 0, "label": alvo, "color": "#e74c3c", "size": 30}]
     arestas = []
     id_no = 1
@@ -44,14 +48,23 @@ def _extrair_nos_arestas(alvo: str, resultados: list[ScanResult]) -> tuple[list,
 
                 val_escaped = html.escape(val[:40])
                 ferramenta_escaped = html.escape(ferramenta[:20])
+                
+                is_central = val in central_nodes
+                node_color = "#ff0000" if is_central else None
+                node_size = 25 if is_central else 15
+                node_title = f"(🚨 NÓ CENTRAL | Score {central_nodes.get(val, '')})\nOrigem: {ferramenta_escaped}" if is_central else f"Encontrado por: {ferramenta_escaped}"
 
-                nos.append({
+                no_dict = {
                     "id": id_no,
                     "label": val_escaped,
-                    "title": f"Encontrado por: {ferramenta_escaped}",
+                    "title": node_title,
                     "group": tipo,
-                    "value": 15
-                })
+                    "value": node_size
+                }
+                if node_color:
+                    no_dict["color"] = node_color
+                
+                nos.append(no_dict)
                 arestas.append({"from": 0, "to": id_no, "label": ferramenta_escaped})
                 id_no += 1
 
