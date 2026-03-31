@@ -1,7 +1,7 @@
 name: brasilapi-cnpj
 category: 🏢 Corporate & CNPJ
 description: Dados da empresa via BrasilAPI (Quadro de Sócios, CNAE, Endereço).
-command: curl -s 'https://brasilapi.com.br/api/cnpj/v1/{alvo}' | jq '.'
+command: curl -s 'https://brasilapi.com.br/api/cnpj/v1/{alvo_url}' | jq '.'
 inputs:
 - id: alvo
   prompt: 'CNPJ alvo (apenas números):'

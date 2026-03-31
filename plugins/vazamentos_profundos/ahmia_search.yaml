@@ -4,4 +4,4 @@ author: Ahmia
 version: 1.0
 category: 🕳️ Vazamentos Profundos (Deep Web)
 target_type: [email, domain, username]
-command: python3 plugins/scripts/ahmia_scraper.py "{target}"
+command: python3 plugins/scripts/ahmia_scraper.py "{alvo}"

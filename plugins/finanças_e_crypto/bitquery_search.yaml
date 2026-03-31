@@ -4,4 +4,4 @@ author: Bitquery
 version: 1.0
 category: 💰 Finanças e Crypto
 target_type: [crypto, btc_address, eth_address]
-command: 'curl -s -X POST -H "Content-Type: application/json" -H "X-API-KEY: {env.BITQUERY_API_KEY}" -d "{\"query\": \"query { bitcoin { transactions(txHash: {\\\\\\\"is\\\\\\\": \\\\\\\"{target}\\\\\\\"}) { hash block { height } } } }\"}" https://graphql.bitquery.io'
+command: 'curl -s -X POST -H "Content-Type: application/json" -H "X-API-KEY: {env.BITQUERY_API_KEY}" -d "{\"query\": \"query { bitcoin { transactions(txHash: {\\\\\\\"is\\\\\\\": \\\\\\\"{alvo_url}\\\\\\\"}) { hash block { height } } } }\"}" https://graphql.bitquery.io'

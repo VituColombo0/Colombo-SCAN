@@ -1,7 +1,7 @@
 name: minhareceita
 category: 🏢 Corporate & CNPJ
 description: Consulta de dados públicos de empresas do Brasil.
-command: curl -s 'https://minhareceita.org/{alvo}' | jq '.'
+command: curl -s 'https://minhareceita.org/{alvo_url}' | jq '.'
 inputs:
 - id: alvo
   prompt: 'CNPJ alvo:'

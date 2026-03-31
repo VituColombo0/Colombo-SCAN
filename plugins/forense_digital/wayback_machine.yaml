@@ -4,4 +4,4 @@ author: Internet Archive
 version: 1.0
 category: 🏛️ Forense Digital & Arqueologia
 target_type: [domain, url]
-command: 'curl -s "https://web.archive.org/cdx/search/cdx?url={target}&output=json&limit=5"'
+command: 'curl -s "https://web.archive.org/cdx/search/cdx?url={alvo_url}&output=json&limit=5"'

@@ -1,7 +1,7 @@
 name: sinesp-api
 category: 🚗 Veículos e Placas
 description: Simulação de busca SINESP para dados básicos de placa (Modelo, Ano, Roubo).
-command: curl -s 'https://api.placafipe.com/v2/placa/{alvo}'
+command: curl -s 'https://api.placafipe.com/v2/placa/{alvo_url}'
 inputs:
 - id: alvo
   prompt: 'Placa do Veículo:'

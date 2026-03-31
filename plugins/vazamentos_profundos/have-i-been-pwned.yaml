@@ -1,7 +1,7 @@
 name: have-i-been-pwned
 category: 🔐 Vazamentos Profundos
 description: Verifica se a conta sofreu algum vazamento massivo documentado.
-command: curl -s -A 'Colombo-OSINT-Scanner' 'https://haveibeenpwned.com/api/v3/breachedaccount/{alvo}'
+command: curl -s -A 'Colombo-OSINT-Scanner' 'https://haveibeenpwned.com/api/v3/breachedaccount/{alvo_url}'
 inputs:
 - id: alvo
   prompt: 'Email ou Username alvo:'

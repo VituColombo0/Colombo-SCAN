@@ -4,4 +4,4 @@ author: GeoSpy API
 version: 1.0
 category: 🖼️ Análise de Imagens
 target_type: [image, foto, exif]
-command: curl -s -X POST https://api.geospy.ai/predict -H "Authorization:Bearer {env.GEOSPY_API_KEY}" -F "image=@{target}"
+command: curl -s -X POST https://api.geospy.ai/predict -H "Authorization:Bearer {env.GEOSPY_API_KEY}" -F "image=@{alvo_url}"

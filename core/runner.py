@@ -27,11 +27,25 @@ MAX_RETRIES = 2
 RETRY_BACKOFF_BASE = 3
 
 class EnvWrapper:
+    def __init__(self):
+        self.missing_keys = []
+
     def __getattr__(self, name):
         import shlex
-        return shlex.quote(os.environ.get(name, ""))
+        # Resolve from OS environment or Shadow Auth file
+        auth = get_auth_env()
+        val = os.environ.get(name) or auth.get(name) or auth.get(name.lower()) or auth.get(name.upper())
+        
+        # Detect missing or placeholder keys
+        if not val or val == "xxxxxx":
+            if name not in self.missing_keys:
+                self.missing_keys.append(name)
+            return "MISSING_KEY"
+            
+        return shlex.quote(str(val))
 
-env_vars = EnvWrapper()
+def _get_env_wrapper():
+    return EnvWrapper()
 
 def sanitize_input(value: str) -> str:
     """
@@ -74,11 +88,25 @@ def _build_docker_command(plugin: dict, inputs: dict):
     entry = plugin.get("entrypoint", "")
     
     import shlex
+    import urllib.parse
+    
+    # 1. Quoted variables for robust shell execution protection (like nmap {alvo})
     inputs_cotados = {k: shlex.quote(str(v)) for k, v in inputs.items()}
+    
+    # 2. URL encoded variables for robust curl API requests without space breakages
+    inputs_url = {f"{k}_url": urllib.parse.quote(str(v)) for k, v in inputs.items()}
+    
+    merged_inputs = {**inputs_cotados, **inputs_url}
+    
+    env_vars = _get_env_wrapper()
+    
     try:
-        cmd_final = cmd_base.format(env=env_vars, **inputs_cotados)
+        cmd_final = cmd_base.format(env=env_vars, **merged_inputs)
     except KeyError as e:
-        return None, f"Erro no YAML: {e}"
+        return None, f"Erro no YAML: {e}", []
+
+    if env_vars.missing_keys:
+        return None, None, env_vars.missing_keys
 
     if imagem:
         # SECURITY: Using bridge network instead of host for isolation.
@@ -91,8 +119,8 @@ def _build_docker_command(plugin: dict, inputs: dict):
             f"--cap-drop=ALL --security-opt=no-new-privileges "
             f"{volumes} {flag_entry} {shlex.quote(imagem)} {cmd_final}"
         )
-        return cmd_docker, None
-    return cmd_final, None
+        return cmd_docker, None, []
+    return cmd_final, None, []
 
 def _executar_um(plugin: dict, inputs: dict) -> ScanResult:
     plugin_name = plugin.get("name", "Unknown")
@@ -117,7 +145,14 @@ def _executar_um(plugin: dict, inputs: dict) -> ScanResult:
     except ValueError as e:
         return ScanResult(plugin_name=plugin_name, target=alvo, raw_output=str(e), status="error")
 
-    cmd, error = _build_docker_command(plugin, inputs_tratados)
+    cmd, error, missing_keys = _build_docker_command(plugin, inputs_tratados)
+    
+    if missing_keys:
+        keys_str = ", ".join(missing_keys)
+        msg = f"⛔ Chave(s) de API ausente(s): {keys_str}. Configure no arquivo .scan_auth.yaml."
+        log.warning(f"[{plugin_name}] {msg}")
+        return ScanResult(plugin_name=plugin_name, target=alvo, raw_output=msg, status="skipped")
+
     if error:
         return ScanResult(plugin_name=plugin_name, target=alvo, raw_output=error, status="skipped")
 

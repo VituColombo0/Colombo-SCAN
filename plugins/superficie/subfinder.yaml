@@ -3,4 +3,4 @@ description: Descoberta passiva e ultra-rápida de subdomínios (Attack Surface 
 author: ProjectDiscovery
 version: latest
 category: 🕸️ Attack Surface Mapping
-command: docker run --rm projectdiscovery/subfinder:latest -d {target} -silent
+command: docker run --rm projectdiscovery/subfinder:latest -d {alvo} -silent

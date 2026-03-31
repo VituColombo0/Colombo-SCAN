@@ -4,4 +4,4 @@ author: ColomboForensics
 version: 1.0
 category: 📄 Documentos e Arquivos
 target_type: [domain]
-command: python3 plugins/scripts/metadata_finder.py {target}
+command: python3 plugins/scripts/metadata_finder.py {alvo}

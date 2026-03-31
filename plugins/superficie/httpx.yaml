@@ -3,4 +3,4 @@ description: Probe passivo para listar tecnologias ativas, resposta HTTP e Títu
 author: ProjectDiscovery
 version: latest
 category: 🕸️ Attack Surface Mapping
-command: docker run --rm projectdiscovery/httpx:latest -u {target} -silent -tech-detect -title -ip
+command: docker run --rm projectdiscovery/httpx:latest -u {alvo} -silent -tech-detect -title -ip

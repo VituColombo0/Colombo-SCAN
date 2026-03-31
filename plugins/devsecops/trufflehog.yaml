@@ -3,4 +3,4 @@ description: Escaneia URLs, diretórios ou repositórios Git atrás de senhas, c
 author: TruffleSecurity
 version: 3.x
 category: 🔒 DevSecOps & Repositories
-command: docker run --rm trufflesecurity/trufflehog:latest any {target} --only-verified
+command: docker run --rm trufflesecurity/trufflehog:latest any {alvo} --only-verified

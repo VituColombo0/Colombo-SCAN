@@ -4,4 +4,4 @@ author: Public API (Mesalytic)
 version: 1.0
 category: 👤 Identidades e Usernames
 target_type: [username, discord_id]
-command: curl -sL https://discordlookup.mesalytic.moe/v1/user/{target}
+command: curl -sL https://discordlookup.mesalytic.moe/v1/user/{alvo_url}

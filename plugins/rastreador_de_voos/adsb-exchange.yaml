@@ -1,7 +1,7 @@
 name: adsb-exchange
 category: ✈️ Rastreador de Voos
 description: Busca não-filtrada de atividade aérea e histórico do avião.
-command: curl -s 'https://api.adsb.lol/api/0/flight/{alvo}'
+command: curl -s 'https://api.adsb.lol/api/0/flight/{alvo_url}'
 inputs:
 - id: alvo
   prompt: 'Número do voo ou Callsign:'

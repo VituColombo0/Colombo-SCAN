@@ -4,4 +4,4 @@ author: ColomboNative
 version: 1.0
 category: 👤 Identidades e Usernames
 target_type: [username, telegram]
-command: python3 plugins/scripts/telegram_scraper.py {target}
+command: python3 plugins/scripts/telegram_scraper.py {alvo}

@@ -4,4 +4,4 @@ author: FaceCheck
 version: 1.0
 category: 🖼️ Análise de Imagens
 target_type: [image, foto]
-command: 'curl -s -X POST https://facecheck.id/api/search -H "Authorization: Bearer {env.FACECHECK_API_KEY}" -F "images=@{target}" -F "id_search=true"'
+command: 'curl -s -X POST https://facecheck.id/api/search -H "Authorization: Bearer {env.FACECHECK_API_KEY}" -F "images=@{alvo_url}" -F "id_search=true"'

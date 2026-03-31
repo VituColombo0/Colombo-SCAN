@@ -1,7 +1,7 @@
 name: flight-tracker-api
 category: ✈️ Rastreador de Voos
 description: Busca status do voo e rotas (baseado no número do voo).
-command: curl -s 'https://flightradar24-sim.colombo.com/api/flight/{alvo}'
+command: curl -s 'https://flightradar24-sim.colombo.com/api/flight/{alvo_url}'
 inputs:
 - id: alvo
   prompt: 'Número do voo (ex: LA8100):'

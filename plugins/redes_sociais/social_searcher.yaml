@@ -4,4 +4,4 @@ author: Social Searcher
 version: 1.0
 category: 🌐 Redes Sociais
 target_type: [username, name]
-command: 'curl -s "https://api.social-searcher.com/v2/search?q={target}&limit=5"'
+command: 'curl -s "https://api.social-searcher.com/v2/search?q={alvo_url}&limit=5"'

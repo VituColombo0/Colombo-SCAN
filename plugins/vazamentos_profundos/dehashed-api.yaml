@@ -1,7 +1,7 @@
 name: dehashed-api
 category: 🔐 Vazamentos Profundos
 description: Busca credenciais em texto claro (requer key, simulação).
-command: curl -s 'https://api.dehashed.com/search?query={alvo}'
+command: curl -s 'https://api.dehashed.com/search?query={alvo_url}'
 inputs:
 - id: alvo
   prompt: 'Email ou IP alvo:'

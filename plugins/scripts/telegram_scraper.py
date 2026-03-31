@@ -1,5 +1,6 @@
 import sys
 import urllib.request
+from urllib.parse import quote
 import re
 
 if len(sys.argv) < 2:
@@ -7,7 +8,8 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 target = sys.argv[1].replace('@', '').replace('t.me/', '').replace('https://', '')
-url = f"https://t.me/{target}"
+target_quoted = quote(target)
+url = f"https://t.me/{target_quoted}"
 
 req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'})
 

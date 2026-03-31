@@ -2,7 +2,7 @@ name: "Google Dorking Engine"
 description: "Realiza buscas avançadas no Google em busca de vazamentos de dados (GitHub, Pastebin, StackOverflow)."
 category: "🔍 Inteligência de Busca"
 image: "python:3.9-slim"
-command: "bash -c 'pip install --upgrade pip --quiet && pip install googlesearch-python --quiet && python3 -c \"from googlesearch import search; queries = [\\\"site:github.com {alvo}\\\", \\\"site:pastebin.com {alvo}\\\", \\\"site:stackoverflow.com {alvo}\\\", \\\"filetype:pdf {alvo}\\\"]; print(\\\"--- GOOGLE DORKING RESULTS ---\\\"); [print(url) for q in queries for url in search(q, num_results=5)]\"'"
+command: "bash -c 'pip install googlesearch-python --quiet && python3 -c \"import sys; from googlesearch import search; alvo=sys.argv[1]; queries=[q + \\\" \\\" + alvo for q in [\\\"site:github.com\\\", \\\"site:pastebin.com\\\", \\\"site:stackoverflow.com\\\", \\\"filetype:pdf\\\"]]; [print(url) for q in queries for url in search(q, num_results=5)]\" \"$1\"' _ {alvo}"
 inputs:
   - id: "alvo"
     type: "text"

@@ -1,7 +1,7 @@
 name: wigle-wifi
 category: 🌍 Geolocalização
 description: Mapeia redes WiFi baseadas em MAC Address ou SSID, ótimo para GEO Intel.
-command: curl -s 'https://api.wigle.net/api/v2/network/search?ssid={alvo}'
+command: curl -s 'https://api.wigle.net/api/v2/network/search?ssid={alvo_url}'
 inputs:
 - id: alvo
   prompt: 'Nome da Rede WiFi (SSID):'
