@@ -100,6 +100,16 @@ def main():
             if resultados:
                 exibir_resultados(resultados)
 
+                # Check if there are any meaningful results
+                from core.intelligence import extrair_insights as _check_insights
+                _insights = _check_insights(resultados)
+                has_positive = bool(_insights.get("positivos"))
+
+                if not has_positive:
+                    console.print("[bold yellow]⚠️  Nenhum resultado relevante foi encontrado nesta varredura.[/bold yellow]")
+                    console.print("[dim]Todos os plugins retornaram erros ou ruído técnico (imagem Docker não encontrada, timeout, etc.).[/dim]")
+                    console.print("[dim]Verifique se o Docker está rodando e se as imagens necessárias estão instaladas.[/dim]\n")
+
                 alvo_nome = alvos[0] if len(alvos) == 1 else f"Multi-{len(alvos)}-alvos"
 
                 # Exportações
@@ -111,6 +121,8 @@ def main():
                     if "grafo" in exports:
                         path = gerar_grafo(alvo_nome, resultados)
                         console.print(f"[green]✅ Grafo salvo em {path}[/green]")
+            else:
+                console.print("[bold red]❌ Nenhum resultado retornado. Verifique o alvo e tente novamente.[/bold red]")
 
                 input("\nPressione ENTER para continuar...")
 

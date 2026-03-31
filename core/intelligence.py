@@ -26,7 +26,6 @@ PATTERNS = {
     # Brazilian Specifics
     EntityType.CPF: r'\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b',
     EntityType.CNPJ: r'\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b',
-    "DATE": r'\d{2}[/-]\d{2}[/-]\d{4}',
 }
 
 # Noise words (don't treat common names/fragments as useful usernames/leads)
@@ -239,7 +238,7 @@ def extrair_insights(resultados: List[ScanResult]) -> Dict[str, Any]:
 
     return {
         "entities": list(unique_entities.values()),
-        "by_type": {k.value: v for k, v in by_type.items()},
+        "by_type": {getattr(k, 'value', k): v for k, v in by_type.items()},
         "correlacoes": correlacoes,
         "alertas": alertas,
         "total_raw": len(all_entities),

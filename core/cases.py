@@ -48,6 +48,11 @@ def selecionar_ou_criar_case() -> int:
         ])
     ).ask()
 
+    if escolha is None:
+        # User pressed Ctrl+C or Esc — fallback to quick session
+        console.print("[yellow]⚠️ Seleção cancelada. Iniciando Sessão Rápida...[/yellow]")
+        return create_case("Sessão Rápida", "Criada automaticamente após cancelamento")
+
     if escolha == "quick":
         # Quick session — create a temp case that can be discarded
         return create_case("Sessão Rápida", "Sessão sem nome — pode ser renomeada depois")
@@ -83,14 +88,12 @@ def selecionar_ou_criar_case() -> int:
                 ]
             ).ask()
             
-            if sub_acao == "enter":
+            if sub_acao is None or sub_acao == "enter":
                 return case_id
             elif sub_acao == "history":
                 _gerar_exportacao_historico_case(case_id)
             elif sub_acao == "back":
                 return selecionar_ou_criar_case()
-            else:
-                return case_id
 
     # Fallback
     return create_case("Investigação", "")

@@ -466,3 +466,61 @@ class TestInputParser:
         from core.input_parser import formatar_resumo_alvos
         resumo = formatar_resumo_alvos([])
         assert "Nenhum" in resumo
+
+
+class TestBugFixes:
+    """Regression tests for bugs found during the v4.2 audit."""
+
+    def test_sanitize_allows_ampersand_in_url(self):
+        """BUG 8: & should be allowed in HTTP URLs (query params)."""
+        from core.runner import sanitize_input
+        result = sanitize_input("https://example.com/search?q=test&page=2")
+        assert "example.com" in result
+
+    def test_sanitize_blocks_ampersand_outside_url(self):
+        """BUG 8: & should still be blocked in non-URL inputs."""
+        from core.runner import sanitize_input
+        with pytest.raises(ValueError, match="perigosos"):
+            sanitize_input("test && rm -rf /")
+
+    def test_cache_rejects_negative_hours(self):
+        """BUG 4: check_cache_result should handle invalid hours safely."""
+        from core.database import check_cache_result
+        # Should not crash — just use default 24h
+        result = check_cache_result("nonexistent_plugin", "target", hours=-1)
+        assert result is None
+
+    def test_dorks_for_domain(self):
+        """BUG 7: Dorks should be generated for DOMAIN type."""
+        from core.dorks import generate_dorks
+        from core.entities import EntityType
+        dorks = generate_dorks("example.com", EntityType.DOMAIN)
+        assert len(dorks) > 0
+        assert any("site:example.com" in d["query"] for d in dorks)
+
+    def test_dorks_for_ip(self):
+        """BUG 7: Dorks should be generated for IP type."""
+        from core.dorks import generate_dorks
+        from core.entities import EntityType
+        dorks = generate_dorks("1.2.3.4", EntityType.IP)
+        assert len(dorks) > 0
+
+    def test_intelligence_patterns_no_string_keys(self):
+        """BUG 6: All keys in PATTERNS should be EntityType, not raw strings."""
+        from core.intelligence import PATTERNS
+        from core.entities import EntityType
+        for key in PATTERNS:
+            assert isinstance(key, EntityType), f"Key '{key}' is not EntityType!"
+
+    def test_insights_by_type_no_crash(self):
+        """BUG 12: by_type dict comprehension should not crash."""
+        from core.intelligence import extrair_insights
+        from core.entities import ScanResult, Entity, EntityType
+        results = [
+            ScanResult("tool1", "target", "email: test@test.com", entities_found=[
+                Entity(EntityType.EMAIL, "test@test.com", "tool1")
+            ])
+        ]
+        insights = extrair_insights(results)
+        # Should not crash and should have valid keys
+        assert isinstance(insights["by_type"], dict)

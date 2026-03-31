@@ -337,10 +337,12 @@ def get_raw_results_by_case(case_id: int) -> list[dict]:
 
 def check_cache_result(plugin_name: str, target: str, hours: int = 24) -> Optional[dict]:
     """Verifica se um resultado de sucesso já existe no banco para o plugin/alvo nas últimas N horas."""
+    if not isinstance(hours, int) or hours <= 0:
+        hours = 24
     conn = get_connection()
     row = conn.execute(
-        f"SELECT * FROM raw_results WHERE plugin_name = ? AND target = ? AND status = 'success' AND created_at >= datetime('now', '-{hours} hours') ORDER BY created_at DESC LIMIT 1",
-        (plugin_name, target)
+        "SELECT * FROM raw_results WHERE plugin_name = ? AND target = ? AND status = 'success' AND created_at >= datetime('now', ? || ' hours') ORDER BY created_at DESC LIMIT 1",
+        (plugin_name, target, f"-{hours}")
     ).fetchone()
     conn.close()
     return dict(row) if row else None

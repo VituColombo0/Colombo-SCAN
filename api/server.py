@@ -46,7 +46,7 @@ def create_app():
     app = FastAPI(
         title="Colombo Scanner API",
         description="API REST protegida e segura",
-        version="4.1.0",
+        version="4.2.0",
         dependencies=[Depends(verify_api_key)]
     )
 
@@ -77,7 +77,7 @@ def create_app():
     def root():
         return {
             "service": "Colombo Scanner API",
-            "version": "3.0.0",
+            "version": "4.2.0",
             "plugins_loaded": len(plugins)
         }
 
@@ -132,8 +132,8 @@ def create_app():
                 resultados = run_plugins_paralelo(selected, {"alvo": target}, max_workers=req.max_workers)
                 all_entities = []
                 for r in resultados:
-                    save_raw_result(scan_id, r.get("name", "?"), target, r.get("output", ""))
-                    ents = extrair_entidades(r.get("output", ""), r.get("name", ""), target)
+                    save_raw_result(scan_id, r.plugin_name, target, r.raw_output)
+                    ents = extrair_entidades(r.raw_output, r.plugin_name, target)
                     all_entities.extend(ents)
                 if all_entities:
                     save_entities(case_id, scan_id, all_entities)

@@ -24,6 +24,26 @@ def generate_dorks(value: str, e_type: EntityType) -> list[dict]:
         dorks.append({"title": "LinkedIn Cross-Match", "query": f'site:linkedin.com/in "{value}"'})
         dorks.append({"title": "Notícias/Diário Oficial", "query": f'"{value}" (fraude OR processo OR jusbrasil OR diario oficial)'})
 
+    elif e_type == EntityType.DOMAIN:
+        dorks.append({"title": "Subdomínios Expostos", "query": f'site:{value} -www'})
+        dorks.append({"title": "Arquivos Sensíveis", "query": f'site:{value} filetype:pdf OR filetype:xls OR filetype:doc OR filetype:sql'})
+        dorks.append({"title": "Painéis Admin", "query": f'site:{value} inurl:admin OR inurl:login OR inurl:painel'})
+
+    elif e_type == EntityType.IP:
+        dorks.append({"title": "Shodan", "query": f'site:shodan.io "{value}"'})
+        dorks.append({"title": "Serviços Expostos", "query": f'"{value}" (port OR open OR service OR banner)'})
+        dorks.append({"title": "Registros de Abuse", "query": f'"{value}" (abuse OR report OR blacklist OR spam)'})
+
+    elif e_type == EntityType.CPF:
+        num_limpo = ''.join(filter(str.isdigit, value))
+        dorks.append({"title": "Processos Judiciais", "query": f'site:jusbrasil.com.br "{value}" OR "{num_limpo}"'})
+        dorks.append({"title": "Documentos Públicos", "query": f'filetype:pdf "{value}" OR "{num_limpo}"'})
+
+    elif e_type == EntityType.CNPJ:
+        num_limpo = ''.join(filter(str.isdigit, value))
+        dorks.append({"title": "Receita Federal", "query": f'"{value}" OR "{num_limpo}" (receita federal OR cnpj)'})
+        dorks.append({"title": "Processos e Fraudes", "query": f'"{value}" OR "{num_limpo}" (processo OR fraude OR irregularidade)'})
+
     # Wrap up into actionable URLs
     result = []
     for d in dorks:

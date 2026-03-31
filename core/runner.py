@@ -51,9 +51,13 @@ def sanitize_input(value: str) -> str:
         log.warning(f"Tentativa de Argument Injection: {stripped}")
         raise ValueError("⛔ Input inválido (não pode iniciar com hífen).")
 
-    # Forbidden shell metacharacters: ; , | , ` , $ , ( , ) , > , < , \ , \n , \r
-    # We allow basic chars for URLs but block dangerous ones even if it starts with http
-    full_dangerous = re.compile(r'[;&|`$()><\n\r\\]')
+    # Forbidden shell metacharacters
+    # We allow & only inside URLs (http/https) since it's used as query separator
+    is_url = stripped.lower().startswith("http://") or stripped.lower().startswith("https://")
+    if is_url:
+        full_dangerous = re.compile(r'[;|`$()><\n\r\\\\]')
+    else:
+        full_dangerous = re.compile(r'[;&|`$()><\n\r\\\\]')
     if full_dangerous.search(stripped):
         log.warning(f"Sanitização bloqueou entrada suspeita: {stripped[:30]}...")
         raise ValueError("⛔ Caracteres perigosos detectados no alvo.")
