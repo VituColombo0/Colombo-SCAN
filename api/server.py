@@ -7,7 +7,7 @@ try:
     from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.security import APIKeyHeader
-    from pydantic import BaseModel
+    from pydantic import BaseModel, Field
     HAS_FASTAPI = True
 except ImportError:
     HAS_FASTAPI = False
@@ -36,7 +36,12 @@ def create_app():
     if not HAS_FASTAPI:
         raise ImportError("FastAPI não instalado. Execute: pip install fastapi uvicorn")
 
-    API_KEY = os.environ.get("COLOMBO_API_KEY", "colombo_secret_key_v4")
+    API_KEY = os.environ.get("COLOMBO_API_KEY")
+    if not API_KEY:
+        import uuid
+        API_KEY = str(uuid.uuid4())
+        log.warning(f"COLOMBO_API_KEY não definida. Chave autogerada (Security by Default): {API_KEY}")
+
     api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
     async def verify_api_key(api_key: str = Depends(api_key_header)):
@@ -62,10 +67,10 @@ def create_app():
     # --- Models ---
 
     class ScanRequest(BaseModel):
-        target: str
+        target: str = Field(..., min_length=1, max_length=2000, description="Alvo a ser escaneado")
         case_id: int | None = None
-        category: str | None = None
-        max_workers: int = 5
+        category: str | None = Field(None, max_length=100)
+        max_workers: int = Field(5, gt=0, le=20, description="Máximo de workers paralelos (1-20)")
 
     class CaseCreate(BaseModel):
         name: str
@@ -155,8 +160,8 @@ def create_app():
         }
 
     @app.get("/scan/{scan_id}/results")
-    def get_results(scan_id: int):
-        results = get_raw_results_by_scan(scan_id)
+    def get_results(scan_id: int, limit: int = 100, skip: int = 0):
+        results = get_raw_results_by_scan(scan_id, limit=limit, offset=skip)
         if not results:
             raise HTTPException(404, "Scan not found or no results yet")
         return results
@@ -169,8 +174,8 @@ def create_app():
         return {"id": case_id, "name": req.name}
 
     @app.get("/cases")
-    def list_cases_api(status: str = "active"):
-        return list_cases(status)
+    def list_cases_api(status: str = "active", limit: int = 50, skip: int = 0):
+        return list_cases(status, limit=limit, offset=skip)
 
     @app.get("/cases/{case_id}")
     def get_case_api(case_id: int):
@@ -181,18 +186,21 @@ def create_app():
         return {**case, "stats": stats}
 
     @app.get("/cases/{case_id}/entities")
-    def get_case_entities(case_id: int):
-        return get_entities_by_case(case_id)
+    def get_case_entities(case_id: int, limit: int = 200, skip: int = 0):
+        return get_entities_by_case(case_id, limit=limit, offset=skip)
 
     @app.get("/cases/{case_id}/correlations")
     def get_case_correlations(case_id: int):
         return get_entity_correlations(case_id)
 
     @app.get("/cases/{case_id}/scans")
-    def list_case_scans(case_id: int):
+    def list_case_scans(case_id: int, limit: int = 50, skip: int = 0):
         from core.database import get_connection
         conn = get_connection()
-        rows = conn.execute("SELECT * FROM scans WHERE case_id = ? ORDER BY started_at DESC", (case_id,)).fetchall()
+        rows = conn.execute(
+            "SELECT * FROM scans WHERE case_id = ? ORDER BY started_at DESC LIMIT ? OFFSET ?",
+            (case_id, limit, skip)
+        ).fetchall()
         conn.close()
         return [dict(r) for r in rows]
 

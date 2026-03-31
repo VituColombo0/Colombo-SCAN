@@ -20,7 +20,7 @@ DB_PATH = os.path.join(DATA_DIR, "colombo.db")
 
 def get_connection() -> sqlite3.Connection:
     """Returns a connection to the SQLite database."""
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=15.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
@@ -119,12 +119,12 @@ def create_case(name: str, description: str = "") -> int:
     return case_id
 
 
-def list_cases(status: str = "active") -> list[dict]:
-    """Lists all cases with optional status filter."""
+def list_cases(status: str = "active", limit: int = 50, offset: int = 0) -> list[dict]:
+    """Lists all cases with optional status filter and pagination."""
     conn = get_connection()
     rows = conn.execute(
-        "SELECT * FROM cases WHERE status = ? ORDER BY updated_at DESC",
-        (status,)
+        "SELECT * FROM cases WHERE status = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?",
+        (status, limit, offset)
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
@@ -218,12 +218,12 @@ def save_entities(case_id: int, scan_id: int, entities: list[Entity]):
     log.info(f"Salvos {len(entities)} entidades no case #{case_id}")
 
 
-def get_entities_by_case(case_id: int) -> list[dict]:
-    """Gets all entities for a case."""
+def get_entities_by_case(case_id: int, limit: int = 200, offset: int = 0) -> list[dict]:
+    """Gets entities for a case with pagination."""
     conn = get_connection()
     rows = conn.execute(
-        "SELECT * FROM entities WHERE case_id = ? ORDER BY created_at",
-        (case_id,)
+        "SELECT * FROM entities WHERE case_id = ? ORDER BY created_at LIMIT ? OFFSET ?",
+        (case_id, limit, offset)
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
@@ -312,12 +312,12 @@ def save_raw_result(scan_id: int, plugin_name: str, target: str, output: str,
     conn.close()
 
 
-def get_raw_results_by_scan(scan_id: int) -> list[dict]:
-    """Gets all raw results for a scan."""
+def get_raw_results_by_scan(scan_id: int, limit: int = 100, offset: int = 0) -> list[dict]:
+    """Gets raw results for a scan with pagination."""
     conn = get_connection()
     rows = conn.execute(
-        "SELECT * FROM raw_results WHERE scan_id = ? ORDER BY created_at",
-        (scan_id,)
+        "SELECT * FROM raw_results WHERE scan_id = ? ORDER BY created_at LIMIT ? OFFSET ?",
+        (scan_id, limit, offset)
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
