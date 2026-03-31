@@ -48,13 +48,13 @@ def _imprimir_output_pdf(pdf, saida):
     for linha in linhas_validas:
         if linhas_impressas > 40: 
             pdf.set_text_color(200, 50, 50)
-            pdf.multi_cell(0, 5, txt="\n[--- DATA TRUNCATED FOR READABILITY ---]", new_x="LMARGIN", new_y="NEXT")
+            pdf.multi_cell(0, 5, text="\n[--- DATA TRUNCATED FOR READABILITY ---]", new_x="LMARGIN", new_y="NEXT")
             break
         try:
             linha_safe = str(linha).encode('ascii', 'ignore').decode('ascii')
             if len(linha_safe) > 110: linha_safe = linha_safe[:110] + "..."
             if linha_safe.strip():
-                pdf.multi_cell(0, 4, txt=linha_safe, new_x="LMARGIN", new_y="NEXT")
+                pdf.multi_cell(0, 4, text=linha_safe, new_x="LMARGIN", new_y="NEXT")
                 linhas_impressas += 1
         except Exception: pass
     pdf.ln(3)
@@ -182,10 +182,10 @@ def gerar_relatorio(alvo: str, resultados: list[ScanResult], output_format: str 
     pdf.output(caminho_pdf)
 
     # JSON & CSV
-    with open(caminho_json, 'w', encoding='utf-8') as f_json:
+    with open(caminho_json, 'w', encoding='utf-8', errors='replace') as f_json:
         json.dump([asdict(r) for r in resultados], f_json, indent=4, ensure_ascii=False)
 
-    with open(caminho_csv, 'w', encoding='utf-8', newline='') as f_csv:
+    with open(caminho_csv, 'w', encoding='utf-8', errors='replace', newline='') as f_csv:
         writer = csv.writer(f_csv)
         writer.writerow(["Ferramenta", "Status", "Alvo", "Output RAW"])
         for r in resultados: writer.writerow([r.plugin_name, r.status, r.target, r.raw_output])
@@ -417,7 +417,7 @@ def gerar_relatorio(alvo: str, resultados: list[ScanResult], output_format: str 
     </div>
 </body></html>"""
     
-    with open(caminho_html, 'w', encoding='utf-8') as f_html:
+    with open(caminho_html, 'w', encoding='utf-8', errors='replace') as f_html:
         f_html.write(html_content)
 
     mapa_retorno = {

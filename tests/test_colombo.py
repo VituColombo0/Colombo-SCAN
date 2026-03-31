@@ -524,3 +524,27 @@ class TestBugFixes:
         insights = extrair_insights(results)
         # Should not crash and should have valid keys
         assert isinstance(insights["by_type"], dict)
+
+    def test_report_generation_unicode_surrogates(self, tmp_path):
+        """Phase 2 Bug: Reports should not crash when tools output invalid unicode surrogates."""
+        from core.report import gerar_relatorio
+        from core.intelligence import extrair_insights
+        from core.entities import ScanResult
+        
+        results = [
+            ScanResult(
+                plugin_name="malformed_tool",
+                target="test_target",
+                raw_output="Junk\n\x00\x01data<script>alert(1)</script> \ud83d\ude00 \x80\x81\x82\x83"
+            )
+        ]
+        insights = extrair_insights(results)
+        
+        # Test all formats to ensure errors='replace' is working
+        for fmt in ["pdf", "html", "json", "csv"]:
+            out_path = str(tmp_path / f"test_report.{fmt}")
+            # Should not raise UnicodeEncodeError
+            try:
+                gerar_relatorio("test_target", results, output_format=fmt, output_path=out_path)
+            except UnicodeEncodeError as e:
+                pytest.fail(f"UnicodeEncodeError raised for format {fmt}: {e}")
