@@ -1,5 +1,5 @@
 """
-Colombo Scanner — UI Module (Result Display)
+Colombo_SCAN — UI Module (Result Display)
 Result formatting and intelligence dashboard display.
 """
 from rich.console import Console

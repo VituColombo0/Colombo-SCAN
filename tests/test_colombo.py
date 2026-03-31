@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Test Suite
+Colombo_SCAN — Test Suite
 Tests for security, plugin validation, entities, database, and intelligence.
 Run with: python -m pytest tests/ -v
 """

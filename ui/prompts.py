@@ -1,5 +1,5 @@
 """
-Colombo Scanner v4.1 — Prompts & Menus
+Colombo_SCAN v4.1 — Prompts & Menus
 Interface interativa com Smart Input Parser, "Executar Todas" e detalhes de ferramentas.
 """
 import questionary

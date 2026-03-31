@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Case Management System
+Colombo_SCAN — Case Management System
 Create, list, and resume investigation cases with persistent storage.
 """
 import questionary

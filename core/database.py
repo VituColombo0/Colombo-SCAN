@@ -1,5 +1,5 @@
 """
-Colombo Scanner — SQLite Database for Persistence
+Colombo_SCAN — SQLite Database for Persistence
 Stores cases, scans, entities, relations, and raw results.
 """
 import sqlite3

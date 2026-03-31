@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Intelligence Correlation Engine v2
+Colombo_SCAN — Intelligence Correlation Engine v2
 Extracts typed entities from results, correlates across tools, and generates scoring.
 """
 import re

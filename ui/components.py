@@ -1,5 +1,5 @@
 """
-Colombo Scanner v4.1 — Visual Components
+Colombo_SCAN v4.1 — Visual Components
 Banner, tutorial e formatação clássica.
 """
 import sys

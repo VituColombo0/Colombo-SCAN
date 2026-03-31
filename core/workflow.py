@@ -1,5 +1,5 @@
 ﻿"""
-Colombo Scanner — Recursive Workflow Engine
+Colombo_SCAN — Recursive Workflow Engine
 Runs plugins for a target, extracts new leads from output, and investigates recursively.
 Enhanced with entity extraction and persistence.
 """

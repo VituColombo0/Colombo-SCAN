@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Pre-Flight Health Check (Non-Blocking)
+Colombo_SCAN — Pre-Flight Health Check (Non-Blocking)
 Checks for required system dependencies but does NOT block the application.
 Returns status dict for the UI to display.
 """

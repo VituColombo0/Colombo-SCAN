@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Secure Plugin Execution Engine
+Colombo_SCAN — Secure Plugin Execution Engine
 Handles Docker container execution with security hardening, retry logic, and rate limiting.
 """
 import subprocess

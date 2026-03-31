@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Smart Input Parser
+Colombo_SCAN — Smart Input Parser
 Auto-detects and normalizes any user input format (phones, emails, names, IPs, etc.)
 regardless of how the user typed it.
 """

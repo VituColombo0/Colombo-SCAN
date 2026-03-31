@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Notification System
+Colombo_SCAN — Notification System
 Sends scan completion notifications via webhooks (Discord, Slack, Telegram, generic).
 """
 import os
@@ -44,7 +44,7 @@ def notificar_scan_completo(alvo: str, total_plugins: int, total_entidades: int,
         return  # No notification configured
 
     mensagem = (
-        f"🔍 **Colombo Scanner — Scan Completo**\n"
+        f"🔍 **Colombo_SCAN — Scan Completo**\n"
         f"📎 Alvo: `{alvo}`\n"
         f"📂 Case: {case_name or 'Sessão Rápida'}\n"
         f"🔌 Plugins executados: {total_plugins}\n"

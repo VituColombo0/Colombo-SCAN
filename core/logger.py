@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Centralized Logging System
+Colombo_SCAN — Centralized Logging System
 Replaces scattered print/console.print debug calls with structured logging.
 """
 import logging

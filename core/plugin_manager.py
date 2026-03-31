@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Plugin Manager with Schema Validation
+Colombo_SCAN — Plugin Manager with Schema Validation
 Loads YAML plugin definitions with validation, normalization, and error reporting.
 """
 import os

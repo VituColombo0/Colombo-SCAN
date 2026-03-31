@@ -1,5 +1,5 @@
 """
-Colombo Scanner — REST API (FastAPI)
+Colombo_SCAN — REST API (FastAPI)
 Provides programmatic access to the scanning engine.
 Usage: python main.py --api
 """
@@ -49,7 +49,7 @@ def create_app():
             raise HTTPException(status_code=403, detail="Acesso negado: API Key inválida")
 
     app = FastAPI(
-        title="Colombo Scanner API",
+        title="Colombo_SCAN API",
         description="API REST protegida e segura",
         version="4.2.0",
         dependencies=[Depends(verify_api_key)]
@@ -81,7 +81,7 @@ def create_app():
     @app.get("/")
     def root():
         return {
-            "service": "Colombo Scanner API",
+            "service": "Colombo_SCAN API",
             "version": "4.2.0",
             "plugins_loaded": len(plugins)
         }

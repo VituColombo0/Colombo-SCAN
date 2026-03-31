@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Continuous Monitoring Engine (Watchdog)
+Colombo_SCAN — Continuous Monitoring Engine (Watchdog)
 Periodic execution and differential alerting.
 """
 import time

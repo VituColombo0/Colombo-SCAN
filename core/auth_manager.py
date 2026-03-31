@@ -18,7 +18,7 @@ def create_auth_template():
     """Gera um template de Shadow Auth se ele nao existir"""
     if not os.path.exists(AUTH_FILE):
         with open(AUTH_FILE, "w", encoding="utf-8") as f:
-            f.write("# COLOMBO SCANNER - Gerenciador Universal de Sessoes (Shadow Auth)\n"
+            f.write("# COLOMBO_SCAN - Gerenciador Universal de Sessoes (Shadow Auth)\n"
                     "# Insira seus cookies e tokens aqui. \n"
                     "# Eles serao injetados ENVIROMENT VARIABLES diretamente no shell/docker dos plugins.\n\n"
                     "github_token: 'ghp_xxxxxx'\n"

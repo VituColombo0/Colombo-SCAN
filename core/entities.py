@@ -1,5 +1,5 @@
 """
-Colombo Scanner — Entity Model
+Colombo_SCAN — Entity Model
 Defines typed entities for OSINT intelligence correlation.
 """
 from dataclasses import dataclass, field

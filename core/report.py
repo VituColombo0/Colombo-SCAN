@@ -26,7 +26,7 @@ class PDF(FPDF):
         self.set_xy(12, 12)
         self.set_font("Helvetica", "B", 22)
         self.set_text_color(255, 255, 255)
-        self.cell(0, 12, "COLOMBO SCANNER", new_x="LMARGIN", new_y="NEXT")
+        self.cell(0, 12, "COLOMBO_SCAN", new_x="LMARGIN", new_y="NEXT")
         
         self.set_font("Helvetica", "B", 9)
         self.set_text_color(0, 210, 255)
@@ -413,7 +413,7 @@ def gerar_relatorio(alvo: str, resultados: list[ScanResult], output_format: str 
     html_content += """
     </div>
     <div style="text-align: center; margin-top: 100px; padding: 40px; border-top: 1px solid var(--border); opacity: 0.3; font-size: 0.8rem; letter-spacing: 2px;">
-        COLOMBO SCANNER // END OF TRANSMISSION
+        COLOMBO_SCAN // END OF TRANSMISSION
     </div>
 </body></html>"""
     

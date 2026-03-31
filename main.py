@@ -1,5 +1,5 @@
 """
-Colombo Scanner v4.1 — Main Entry Point
+Colombo_SCAN v4.1 — Main Entry Point
 Modos clássicos com Smart Input Parser e opção "Executar Todas".
 """
 import argparse
@@ -15,7 +15,7 @@ from core.health_check import check_dependencies
 from core.input_parser import adaptar_para_plugin
 
 def main():
-    parser = argparse.ArgumentParser(description="Colombo Scanner v4.1")
+    parser = argparse.ArgumentParser(description="Colombo_SCAN v4.1")
     parser.add_argument("--alvo", help="Alvo para varredura silenciosa")
     parser.add_argument("--api", action="store_true", help="Inicia o servidor API")
     args = parser.parse_args()

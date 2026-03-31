@@ -1,7 +1,7 @@
 name: censys-cli
 category: 💻 IoT e Dispositivos
 description: Busca certificados SSL, hosts expostos e servidores via Censys.
-command: curl -A 'Colombo Scanner' -s 'https://search.censys.io/api/v2/hosts/{alvo}'
+command: curl -A 'Colombo_SCAN' -s 'https://search.censys.io/api/v2/hosts/{alvo}'
 inputs:
 - id: alvo
   prompt: 'IP alvo:'
