@@ -4,8 +4,9 @@ Provides programmatic access to the scanning engine.
 Usage: python main.py --api
 """
 try:
-    from fastapi import FastAPI, HTTPException, BackgroundTasks
+    from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
     from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.security import APIKeyHeader
     from pydantic import BaseModel
     HAS_FASTAPI = True
 except ImportError:
@@ -35,10 +36,18 @@ def create_app():
     if not HAS_FASTAPI:
         raise ImportError("FastAPI não instalado. Execute: pip install fastapi uvicorn")
 
+    API_KEY = os.environ.get("COLOMBO_API_KEY", "colombo_secret_key_v4")
+    api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
+
+    async def verify_api_key(api_key: str = Depends(api_key_header)):
+        if api_key != API_KEY:
+            raise HTTPException(status_code=403, detail="Acesso negado: API Key inválida")
+
     app = FastAPI(
         title="Colombo Scanner API",
-        description="API REST para o Colombo OSINT Scanner",
-        version="3.0.0"
+        description="API REST protegida e segura",
+        version="4.1.0",
+        dependencies=[Depends(verify_api_key)]
     )
 
     app.add_middleware(
@@ -100,6 +109,9 @@ def create_app():
             raise HTTPException(400, "Target is required")
         if req.max_workers <= 0:
             raise HTTPException(400, "max_workers must be greater than 0")
+        if req.max_workers > 20:
+            log.warning(f"Limitando max_workers de {req.max_workers} para 20.")
+            req.max_workers = 20
 
         tipo = detectar_tipo(target)
 

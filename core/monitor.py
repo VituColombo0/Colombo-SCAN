@@ -39,7 +39,8 @@ def iniciar_monitoramento(alvo: str, plugins: list, case_id: int, intervalo_hora
         intervalo_horas = 24.0
     from core.smart_scan import filtrar_plugins_smart
     from core.runner import run_plugins_paralelo
-    import main
+    from core.engine import ColomboEngine
+    engine = ColomboEngine()
 
     case = get_case(case_id)
     case_name = case.get("name", f"Case #{case_id}") if case else "Desconhecido"
@@ -69,7 +70,7 @@ def iniciar_monitoramento(alvo: str, plugins: list, case_id: int, intervalo_hora
             resultados = run_plugins_paralelo(plugins_roda, {"alvo": alvo})
             
             # Persistir e pegar o novo scan_id
-            scan_id = main._persistir_resultados(case_id, alvo, resultados, scan_type="monitor")
+            scan_id = engine.persistir_resultados(case_id, alvo, resultados, scan_type="monitor")
             
             if not scan_id:
                 console.print("[red]Erro: Não foi possível obter scan_id devido a um problema no banco.[/red]")

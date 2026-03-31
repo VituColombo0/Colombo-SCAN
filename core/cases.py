@@ -66,11 +66,31 @@ def selecionar_ou_criar_case() -> int:
 
     # Resuming existing case
     if isinstance(escolha, int):
-        case = get_case(escolha)
-        if case:
-            console.print(f"[bold cyan]📂 Retomando Case #{case['id']}: {case['name']}[/bold cyan]")
-            _exibir_resumo_case(escolha)
-            return escolha
+        case_id = escolha
+        while True:
+            case = get_case(case_id)
+            if not case: return selecionar_ou_criar_case()
+            
+            console.print(f"\n[bold cyan]📂 Opções do Case #{case['id']}: {case['name']}[/bold cyan]")
+            _exibir_resumo_case(case_id)
+            
+            sub_acao = questionary.select(
+                "O que deseja fazer?",
+                choices=[
+                    questionary.Choice("🚀 Começar Varredura (Entrar e Rodar)", value="enter"),
+                    questionary.Choice("📖 Ver Histórico / Gerar Relatórios", value="history"),
+                    questionary.Choice("⬅️ Voltar ao Menu de Seleção", value="back"),
+                ]
+            ).ask()
+            
+            if sub_acao == "enter":
+                return case_id
+            elif sub_acao == "history":
+                _gerar_exportacao_historico_case(case_id)
+            elif sub_acao == "back":
+                return selecionar_ou_criar_case()
+            else:
+                return case_id
 
     # Fallback
     return create_case("Investigação", "")
@@ -116,13 +136,21 @@ def menu_gerenciar_cases():
         acao = questionary.select(
             "Ação:",
             choices=[
+                questionary.Choice("📖 Visualizar/Exportar Histórico Completo de um Case", value="history"),
                 questionary.Choice("🔒 Fechar um Case Ativo", value="close"),
                 questionary.Choice("🗑️ Deletar um Case Antigo", value="delete"),
                 questionary.Choice("⬅️ Voltar", value="back"),
             ]
         ).ask()
 
-        if acao == "close" and cases:
+        if acao == "history":
+            todos = cases + closed_cases
+            opcoes = [questionary.Choice(f"#{c['id']} — {c['name']}", value=c["id"]) for c in todos]
+            case_id = questionary.select("De qual Case deseja gerar o Dossiê/Visualização?", choices=opcoes).ask()
+            if case_id:
+                _gerar_exportacao_historico_case(case_id)
+
+        elif acao == "close" and cases:
             opcoes = [questionary.Choice(f"#{c['id']} — {c['name']}", value=c["id"]) for c in cases]
             case_id = questionary.select("Qual case deseja fechar?", choices=opcoes).ask()
             if case_id:
@@ -137,3 +165,38 @@ def menu_gerenciar_cases():
                 if confirm:
                     delete_case(case_id)
                     console.print(f"[red]🗑️ Case #{case_id} deletado permanentemente.[/red]")
+
+def _gerar_exportacao_historico_case(case_id: int):
+    """Fetches all history of a case, visualizes and triggers export flow."""
+    from core.database import get_raw_results_by_case
+    from core.entities import ScanResult
+    from core.ui import exibir_resultados
+    from ui.prompts import menu_exportacao
+    from core.report import gerar_relatorio
+    from core.graph import gerar_grafo
+
+    raws = get_raw_results_by_case(case_id)
+    if not raws:
+        console.print("[yellow]⚠️ Nenhum resultado encontrado neste Case ainda.[/yellow]")
+        input("\nPressione ENTER para voltar...")
+        return
+        
+    resultados = [ScanResult(
+        plugin_name=r["plugin_name"], 
+        target=r["target"], 
+        raw_output=r["output"], 
+        status=r["status"]
+    ) for r in raws]
+    
+    console.print(f"\n[bold cyan]📦 Carregando {len(resultados)} resultados históricos do Case #{case_id}...[/bold cyan]")
+    exibir_resultados(resultados)
+    
+    exports = menu_exportacao(f"Case_Completo_{case_id}")
+    if exports:
+        if any(x in exports for x in ["pdf", "json", "csv", "html"]):
+            path = gerar_relatorio(f"Case_Completo_{case_id}", resultados)
+            console.print(f"[green]✅ Relatório Completo salvo na pasta relatorios/[/green]")
+        if "grafo" in exports:
+            path = gerar_grafo(f"Case_Completo_{case_id}", resultados)
+            console.print(f"[green]✅ Grafo do Case salvo em {path}[/green]")
+    input("\nPressione ENTER para continuar...")

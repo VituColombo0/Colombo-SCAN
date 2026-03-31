@@ -1,8 +1,4 @@
-"""
-Colombo Scanner — Execution Engine
-Orchestrates different scan modes and coordinates between tools and persistence.
-"""
-from datetime import datetime
+from typing import Optional, List, Dict, Any
 from core.plugin_manager import load_plugins
 from core.runner import run_plugins_paralelo, run_plugin
 from core.smart_scan import filtrar_plugins_smart, detectar_tipo
@@ -88,39 +84,64 @@ class ColomboEngine:
             
         return resultados
 
-    def persistir_resultados(self, case_id: int, alvo: str, resultados: list[ScanResult], scan_type: str):
+    def persistir_resultados(self, case_id: int, alvo: str, resultados: list[ScanResult], scan_type: str) -> Optional[int]:
         """Helper to save results to DB and trigger notifications."""
+        if not resultados:
+            log.warning(f"Engine: Nenhum resultado para persistir em {alvo}")
+            return None
+
+        scan_id = None
         try:
             scan_id = create_scan(case_id, alvo, scan_type=scan_type, plugin_count=len(resultados))
+            if not scan_id:
+                raise RuntimeError("Falha ao criar registro de Scan no banco.")
+
             all_entities = []
             
             for r in resultados:
-                save_raw_result(
-                    scan_id=scan_id,
-                    plugin_name=r.plugin_name,
-                    target=alvo,
-                    output=r.raw_output,
-                    layer=r.layer
-                )
-                entities = extrair_entidades(r.raw_output, source_tool=r.plugin_name, source_target=alvo)
-                all_entities.extend(entities)
+                try:
+                    save_raw_result(
+                        scan_id=scan_id,
+                        plugin_name=r.plugin_name,
+                        target=alvo,
+                        output=r.raw_output,
+                        layer=r.layer
+                    )
+                    entities = extrair_entidades(r.raw_output, source_tool=r.plugin_name, source_target=alvo)
+                    all_entities.extend(entities)
+                except Exception as e:
+                    log.error(f"Erro ao salvar resultado individual ({r.plugin_name}): {e}")
 
             if all_entities:
-                save_entities(case_id, scan_id, all_entities)
+                try:
+                    save_entities(case_id, scan_id, all_entities)
+                except Exception as e:
+                    log.error(f"Erro ao salvar entidades correlacionadas: {e}")
             
             finish_scan(scan_id, status="completed")
-            
-            # Notifications
-            case = get_case(case_id)
-            insights = extrair_insights(resultados)
-            notificar_scan_completo(
-                alvo=alvo,
-                total_plugins=len(resultados),
-                total_entidades=len(all_entities),
-                case_name=case.get("name", "") if case else "",
-                correlacoes=len(insights.get("correlacoes", []))
-            )
+            log.info(f"Scan {scan_id} finalizado e persistido com sucesso.")
+
+            # Notifications (non-blocking)
+            try:
+                case = get_case(case_id)
+                insights = extrair_insights(resultados)
+                notificar_scan_completo(
+                    alvo=alvo,
+                    total_plugins=len(resultados),
+                    total_entidades=len(all_entities),
+                    case_name=case.get("name", "") if case else "Case",
+                    correlacoes=len(insights.get("correlacoes", []))
+                )
+            except Exception as e:
+                log.warning(f"Falha ao enviar notificação: {e}")
+
             return scan_id
+
         except Exception as e:
-            log.error(f"Engine persistence failure: {e}")
+            log.error(f"Erro crítico na persistência do Engine: {e}")
+            if scan_id:
+                try:
+                    finish_scan(scan_id, status="failed")
+                except:
+                    pass
             return None

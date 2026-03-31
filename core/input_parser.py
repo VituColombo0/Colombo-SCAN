@@ -111,75 +111,78 @@ _RE_VOO = re.compile(r"\b[A-Z]{2,3}\d{1,4}\b", re.IGNORECASE)
 
 # ── Detecção de tipo para um token limpo ─────────────────────────────────────
 
-def _detectar_tipo_token(token: str) -> tuple[str, str]:
-    """Detecta o tipo de um token já isolado. Retorna (tipo, valor_normalizado)."""
-    t = token.strip()
-    if not t:
-        return ("", "")
-
-    lower = t.lower()
+def detectar_tipo(alvo: str) -> str:
+    """Detecta o tipo do alvo (email, ip, telefone, etc.) com base no formato.
+    Unifica a lógica de detecção para todo o sistema.
+    """
+    a = alvo.strip().lower()
+    if not a:
+        return ""
 
     # Email
-    if _RE_EMAIL.fullmatch(t):
-        return ("email", normalizar_email(t))
+    if _RE_EMAIL.fullmatch(a):
+        return "email"
 
     # URL (antes de domínio para não conflitar)
-    if _RE_URL.match(t):
-        if "github.com" in lower:
-            return ("github", t)
-        return ("url", t)
+    if _RE_URL.match(a):
+        if "github.com" in a:
+            return "github"
+        return "url"
 
     # IP
-    if _RE_IP.fullmatch(t):
-        return ("ip", t)
+    if _RE_IP.fullmatch(a):
+        return "ip"
 
     # CNPJ (antes de CPF para não conflitar)
-    if _RE_CNPJ.fullmatch(t):
-        return ("cnpj", normalizar_cnpj(t))
+    if _RE_CNPJ.fullmatch(a):
+        return "cnpj"
 
-    # Telefone puro (somente dígitos, 7-15) — ANTES de CPF para evitar falso positivo
-    digits_only = re.sub(r"[^\d]", "", t)
-    if len(digits_only) >= 7 and len(digits_only) <= 15 and re.match(r"^[\d\s\-\+\(\)]+$", t):
-        return ("telefone", normalizar_telefone(t))
+    # Telefone: normaliza removendo espaços/hífens/parênteses
+    digits_only = re.sub(r"[^\d]", "", a)
+    # Verifica se parece um telefone (dígitos + símbolos permitidos)
+    if (7 <= len(digits_only) <= 15) and re.match(r"^[\+\d\s\-\(\)]+$", a):
+        return "telefone"
 
-    # CPF — só se tiver formatação (pontos/hífens), senão confunde com telefone
-    if re.fullmatch(r"\d{3}\.\d{3}\.\d{3}-\d{2}", t):
-        return ("cpf", normalizar_cpf(t))
+    # CPF
+    if _RE_CPF.fullmatch(a):
+        return "cpf"
 
     # Placa de veículo
-    if _RE_PLACA.fullmatch(t):
-        return ("placa", t.upper().replace("-", ""))
+    if _RE_PLACA.fullmatch(a):
+        return "placa"
 
     # MAC address
-    if _RE_MAC.fullmatch(t):
-        return ("mac", t.lower())
+    if _RE_MAC.fullmatch(a):
+        return "mac"
 
     # Arquivo/mídia (caminhos e extensões)
     for tipo_midia, exts in EXTENSOES_MIDIA.items():
-        if any(lower.endswith(ext) for ext in exts):
-            return (tipo_midia, t)
-    if t.startswith("/") or t.startswith("./"):
-        return ("arquivo", t)
+        if any(a.endswith(ext) for ext in exts):
+            return tipo_midia
+    if a.startswith("/") or a.startswith("./"):
+        return "arquivo"
 
     # Domínio
-    if _RE_DOMINIO.fullmatch(t) and "." in t and " " not in t:
-        if "github.com" in lower:
-            return ("github", t)
-        return ("dominio", t)
+    if _RE_DOMINIO.fullmatch(a) and "." in a and " " not in a:
+        if "github.com" in a:
+            return "github"
+        return "dominio"
 
     # Crypto wallet (começa com prefixo específico e >25 chars)
-    if any(t.startswith(p) for p in PREFIXOS_CRIPTO) and len(t) > 25:
-        return ("cripto", t)
-
-    # Username vs Nome
-    if " " in t.strip() and len(t.strip()) > 2:
-        return ("nome", normalizar_nome(t))
+    alvo_orig = alvo.strip()
+    if any(alvo_orig.startswith(p) for p in PREFIXOS_CRIPTO) and len(alvo_orig) > 25:
+        return "cripto"
 
     # Voo (ex: AD4512) — só se for curto
-    if _RE_VOO.fullmatch(t) and len(t) <= 7:
-        return ("voo", t.upper())
+    if _RE_VOO.fullmatch(a) and len(a) <= 7:
+        return "voo"
 
-    return ("username", t.strip())
+    # Nome vs Username
+    if " " in a.strip() and len(a.strip()) > 2:
+        # Se tem espaços e é razoavelmente longo, tratamos como Nome
+        return "nome"
+
+    return "username"
 
 
 # ── Separação inteligente do input ───────────────────────────────────────────
@@ -301,11 +304,20 @@ def parse_input_livre(raw_text: str) -> list[ParsedInput]:
 
     results = []
     for token in unique_tokens:
-        tipo, normalizado = _detectar_tipo_token(token)
-        if tipo and normalizado:
+        tipo = detectar_tipo(token)
+        if tipo:
+            # Normalização baseada no tipo
+            if tipo == "email": val = normalizar_email(token)
+            elif tipo == "telefone": val = normalizar_telefone(token)
+            elif tipo == "cpf": val = normalizar_cpf(token)
+            elif tipo == "cnpj": val = normalizar_cnpj(token)
+            elif tipo == "nome": val = normalizar_nome(token)
+            elif tipo == "placa": val = token.upper().replace("-", "")
+            else: val = token.strip()
+            
             results.append(ParsedInput(
                 valor_original=token,
-                valor_normalizado=normalizado,
+                valor_normalizado=val,
                 tipo=tipo,
             ))
 

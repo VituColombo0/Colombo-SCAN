@@ -3,7 +3,7 @@ category: 📱 Inteligência de Telefones
 description: WhatsApp Avatar plugin
 type: docker
 image: alpine
-command: sh -c 'wget -qO- "https://wa.me/{alvo}" | grep -Eo "https://pps.whatsapp.net[^"]+"'
+command: sh -c 'wget -qO- "https://wa.me/{alvo}" | grep -Eo "https://pps.whatsapp.net[^ ]+"'
 inputs:
 - id: alvo
   prompt: 'Digite o alvo para WhatsApp Avatar:'

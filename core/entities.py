@@ -20,6 +20,8 @@ class EntityType(str, Enum):
     SOCIAL_PROFILE = "social_profile"
     ORGANIZATION = "organization"
     PERSON = "person"
+    CPF = "cpf"
+    CNPJ = "cnpj"
     UNKNOWN = "unknown"
 
 

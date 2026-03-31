@@ -28,19 +28,40 @@ RETRY_BACKOFF_BASE = 3
 
 class EnvWrapper:
     def __getattr__(self, name):
-        return os.environ.get(name, "")
+        import shlex
+        return shlex.quote(os.environ.get(name, ""))
 
 env_vars = EnvWrapper()
 
 def sanitize_input(value: str) -> str:
+    """
+    Blocks lethal shell meta-characters and directory traversal attempts.
+    """
     if not isinstance(value, str):
         raise ValueError(f"Input deve ser string, recebeu: {type(value)}")
+    
     stripped = value.strip()
-    if len(stripped) > 500:
-        raise ValueError("⛔ Input muito longo.")
+    if not stripped:
+        return ""
+        
+    if len(stripped) > 250: # Reduced from 500 for tighter security
+        raise ValueError("⛔ Input excessivamente longo.")
+
+    if stripped.startswith("-"):
+        log.warning(f"Tentativa de Argument Injection: {stripped}")
+        raise ValueError("⛔ Input inválido (não pode iniciar com hífen).")
+
+    # Forbidden shell metacharacters: ; , | , ` , $ , ( , ) , > , < , \ , \n , \r
+    # We allow basic chars for URLs but block dangerous ones even if it starts with http
     full_dangerous = re.compile(r'[;&|`$()><\n\r\\]')
-    if full_dangerous.search(stripped) and not stripped.startswith("http"):
-        raise ValueError("⛔ Caracteres perigosos detectados.")
+    if full_dangerous.search(stripped):
+        log.warning(f"Sanitização bloqueou entrada suspeita: {stripped[:30]}...")
+        raise ValueError("⛔ Caracteres perigosos detectados no alvo.")
+        
+    if ".." in stripped:
+        log.warning(f"Tentativa de Directory Traversal: {stripped}")
+        raise ValueError("⛔ Caminho inválido (traversal detectado).")
+
     return stripped
 
 def _build_docker_command(plugin: dict, inputs: dict):
@@ -56,9 +77,16 @@ def _build_docker_command(plugin: dict, inputs: dict):
         return None, f"Erro no YAML: {e}"
 
     if imagem:
+        # SECURITY: Using bridge network instead of host for isolation.
+        # Adding --cap-drop=ALL and --security-opt to harden the container.
         volumes = f"-v {shlex.quote(WORKSPACE_DIR)}:/workspace:ro"
         flag_entry = f"--entrypoint {shlex.quote(entry)}" if entry else ""
-        cmd_docker = f"docker run --rm --network host {volumes} {flag_entry} {shlex.quote(imagem)} {cmd_final}"
+        
+        cmd_docker = (
+            f"docker run --rm --network bridge "
+            f"--cap-drop=ALL --security-opt=no-new-privileges "
+            f"{volumes} {flag_entry} {shlex.quote(imagem)} {cmd_final}"
+        )
         return cmd_docker, None
     return cmd_final, None
 

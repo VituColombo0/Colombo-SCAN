@@ -1,0 +1,78 @@
+[
+    {
+        "plugin_name": "Sherlock",
+        "target": "lirool",
+        "raw_output": "Found profile on GitHub: https://github.com/lirool",
+        "entities_found": [
+            {
+                "type": "username",
+                "value": "lirool",
+                "source_tool": "Sherlock",
+                "source_target": "lirool",
+                "confidence": 1.0,
+                "timestamp": "2026-03-26T12:50:50.683378",
+                "metadata": {},
+                "id": null
+            },
+            {
+                "type": "domain",
+                "value": "github.com",
+                "source_tool": "Sherlock",
+                "source_target": "lirool",
+                "confidence": 1.0,
+                "timestamp": "2026-03-26T12:50:50.683386",
+                "metadata": {},
+                "id": null
+            }
+        ],
+        "relations_found": [],
+        "status": "success",
+        "execution_time": 0.0,
+        "layer": 1,
+        "timestamp": "2026-03-26T12:50:50.683392"
+    },
+    {
+        "plugin_name": "Maigret",
+        "target": "lirool",
+        "raw_output": "Profile found on Twitter",
+        "entities_found": [
+            {
+                "type": "username",
+                "value": "lirool",
+                "source_tool": "Maigret",
+                "source_target": "lirool",
+                "confidence": 1.0,
+                "timestamp": "2026-03-26T12:50:50.683395",
+                "metadata": {},
+                "id": null
+            }
+        ],
+        "relations_found": [],
+        "status": "success",
+        "execution_time": 0.0,
+        "layer": 1,
+        "timestamp": "2026-03-26T12:50:50.683397"
+    },
+    {
+        "plugin_name": "Brazilian Intelligence",
+        "target": "123.456.789-00",
+        "raw_output": "CPF Validado e vinculado a Nome Teste",
+        "entities_found": [
+            {
+                "type": "cpf",
+                "value": "123.456.789-00",
+                "source_tool": "Brazilian Intelligence",
+                "source_target": "123.456.789-00",
+                "confidence": 1.0,
+                "timestamp": "2026-03-26T12:50:50.683399",
+                "metadata": {},
+                "id": null
+            }
+        ],
+        "relations_found": [],
+        "status": "success",
+        "execution_time": 0.0,
+        "layer": 1,
+        "timestamp": "2026-03-26T12:50:50.683401"
+    }
+]

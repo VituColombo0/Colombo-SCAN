@@ -15,8 +15,12 @@ def send_scan(target, i):
     print(f"[REQ {i}] Enviando scan para {target}...")
     try:
         data = json.dumps(payload).encode("utf-8")
+        headers = {
+            "Content-Type": "application/json",
+            "X-API-Key": "colombo_secret_key_v4"
+        }
         req = urllib.request.Request(f"{API_URL}/scan", data=data, 
-                                     headers={"Content-Type": "application/json"}, method="POST")
+                                     headers=headers, method="POST")
         with urllib.request.urlopen(req, timeout=10) as resp:
             res_data = json.loads(resp.read().decode())
             print(f"[RES {i}] Status: {resp.status} | Scan ID: {res_data.get('scan_id')}")

@@ -17,7 +17,13 @@ from core.input_parser import adaptar_para_plugin
 def main():
     parser = argparse.ArgumentParser(description="Colombo Scanner v4.1")
     parser.add_argument("--alvo", help="Alvo para varredura silenciosa")
+    parser.add_argument("--api", action="store_true", help="Inicia o servidor API")
     args = parser.parse_args()
+
+    if args.api:
+        from api.server import start_api
+        start_api()
+        sys.exit(0)
 
     engine = ColomboEngine()
 
@@ -39,30 +45,6 @@ def main():
         if escolha == "sair" or escolha is None: break
         if escolha == "tutorial": exibir_tutorial(); continue
         if escolha == "cases": menu_gerenciar_cases(); continue
-
-        if escolha == "historico":
-            from core.database import get_raw_results_by_case
-            from core.entities import ScanResult
-            
-            raws = get_raw_results_by_case(case_id)
-            if not raws:
-                console.print("\n[yellow]⚠️ Nenhum resultado encontrado neste Case ainda. Faça investigações primeiro![/yellow]\n")
-                continue
-                
-            resultados = [ScanResult(plugin_name=r["plugin_name"], target=r["target"], raw_output=r["output"], status=r["status"]) for r in raws]
-            console.print(f"\n[bold cyan]📦 Carregando {len(resultados)} resultados históricos do Case #{case_id}...[/bold cyan]")
-            
-            exibir_resultados(resultados)
-            
-            exports = menu_exportacao(f"Case_{case_id}_Completo")
-            if exports:
-                if any(x in exports for x in ["pdf", "json", "csv", "html"]):
-                    path = gerar_relatorio(f"Case_Completo_{case_id}", resultados)
-                    console.print(f"[green]✅ Relatório Completo salvo em relatorios/[/green]")
-                if "grafo" in exports:
-                    path = gerar_grafo(f"Case_Completo_{case_id}", resultados)
-                    console.print(f"[green]✅ Grafo do Case salvo em {path}[/green]")
-            continue
 
         if escolha in ["auto", "manual"]:
             alvos = []

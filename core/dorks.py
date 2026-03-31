@@ -20,7 +20,7 @@ def generate_dorks(value: str, e_type: EntityType) -> list[dict]:
         dorks.append({"title": "Redes Sociais Niche", "query": f'"{value}" -site:youtube.com -site:facebook.com'})
         dorks.append({"title": "Listas de Senhas (Git)", "query": f'site:github.com "{value}" password OR token'})
 
-    elif e_type == EntityType.NAME:
+    elif e_type == EntityType.PERSON:
         dorks.append({"title": "LinkedIn Cross-Match", "query": f'site:linkedin.com/in "{value}"'})
         dorks.append({"title": "Notícias/Diário Oficial", "query": f'"{value}" (fraude OR processo OR jusbrasil OR diario oficial)'})
 

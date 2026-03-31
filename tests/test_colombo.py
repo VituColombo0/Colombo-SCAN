@@ -48,8 +48,9 @@ class TestSecurity:
 
     def test_sanitize_blocks_long_input(self):
         from core.runner import sanitize_input
-        with pytest.raises(ValueError, match="muito longo"):
-            sanitize_input("a" * 501)
+        # Changed "muito longo" to "longo" to match "excessivamente longo"
+        with pytest.raises(ValueError, match="longo"):
+            sanitize_input("a" * 300) # Threshold is now 250
 
     def test_no_home_volume_in_runner(self):
         """Ensures the dangerous -v /home:/home is no longer in the codebase."""
@@ -146,6 +147,20 @@ class TestEntityExtraction:
         phone_values = [e.value for e in entities if e.type.value == "phone"]
         assert len(phone_values) > 0
 
+    def test_extract_cpf(self):
+        from core.intelligence import extrair_entidades
+        from core.entities import EntityType
+        entities = extrair_entidades("O CPF do alvo é 123.456.789-00")
+        values = [e.value for e in entities if e.type == EntityType.CPF]
+        assert "123.456.789-00" in values
+
+    def test_extract_cnpj(self):
+        from core.intelligence import extrair_entidades
+        from core.entities import EntityType
+        entities = extrair_entidades("Empresa CNPJ: 12.345.678/0001-90")
+        values = [e.value for e in entities if e.type == EntityType.CNPJ]
+        assert "12.345.678/0001-90" in values
+
     def test_extract_empty_text(self):
         from core.intelligence import extrair_entidades
         entities = extrair_entidades("")
@@ -155,6 +170,37 @@ class TestEntityExtraction:
         from core.intelligence import extrair_entidades
         entities = extrair_entidades(None)
         assert entities == []
+
+
+class TestIntelligence:
+    """Tests for correlation and scoring logic."""
+
+    def test_score_calculation(self):
+        from core.intelligence import extrair_insights
+        from core.entities import ScanResult, Entity, EntityType
+        
+        # Mock results with overlapping entities
+        results = [
+            ScanResult("tool1", "target", "output", entities_found=[
+                Entity(EntityType.EMAIL, "target@example.com", "tool1"),
+                Entity(EntityType.IP, "1.2.3.4", "tool1")
+            ]),
+            ScanResult("tool2", "target", "output", entities_found=[
+                Entity(EntityType.EMAIL, "target@example.com", "tool2")
+            ])
+        ]
+        
+        insights = extrair_insights(results)
+        
+        # target@example.com appears in 2 tools -> should be in correlacoes
+        email_corr = next(c for c in insights["correlacoes"] if c["value"] == "target@example.com")
+        assert "tool1" in email_corr["tools"]
+        assert "tool2" in email_corr["tools"]
+        assert email_corr["score"] > 2
+        
+        # 1.2.3.4 was only in 1 tool -> should be in entities but NOT in correlacoes
+        assert any(e.value == "1.2.3.4" for e in insights["entities"])
+        assert not any(c["value"] == "1.2.3.4" for c in insights["correlacoes"])
 
 
 class TestDatabase:

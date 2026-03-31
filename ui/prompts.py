@@ -12,21 +12,21 @@ from core.input_parser import parse_input_livre, formatar_resumo_alvos, ParsedIn
 console = Console()
 
 def menu_principal() -> str:
+    """Main operational hub menu."""
     return questionary.select(
-        "Selecione o modo de investigação:",
+        "OPERATIONAL HUB — SELECT MISSION TYPE:",
         choices=[
-            {"name": "🎯 Investigação Automática (Inteligente)", "value": "auto"},
-            {"name": "🧩 Modo Manual (Escolher Ferramentas)", "value": "manual"},
-            {"name": "📖 Ver Histórico de Descobertas do Caso Atual", "value": "historico"},
-            {"name": "📂 Gerenciar Cases (Global)", "value": "cases"},
-            {"name": "💡 Tutorial / Ajuda", "value": "tutorial"},
-            {"name": "❌ Sair", "value": "sair"}
+            {"name": "🎯 AUTO-INVESTIGATOR (Smart Neural Engine)", "value": "auto"},
+            {"name": "🧩 TACTICAL CONTROL (Manual Tool Selection)", "value": "manual"},
+            {"name": "📂 CASE MANAGEMENT (Archives & History)", "value": "cases"},
+            {"name": "💡 OPERATIONAL MANUAL (Tutorial & Help)", "value": "tutorial"},
+            {"name": "❌ EXIT SYSTEM", "value": "sair"}
         ],
         style=questionary.Style([
-            ('qmark', 'fg:cyan bold'),
-            ('question', 'bold'),
-            ('pointer', 'fg:blue bold'),
-            ('selected', 'fg:blue bold'),
+            ('qmark', 'fg:bright_yellow bold'),
+            ('question', 'bold white'),
+            ('pointer', 'fg:bright_blue bold'),
+            ('selected', 'fg:bright_blue bold'),
         ])
     ).ask()
 
@@ -66,26 +66,26 @@ def _mostrar_detalhes_ferramenta(plugin: dict):
 
 def escolher_plugins_manual(categorias: dict) -> list:
     """Interface multi-seleção de plugins por categoria, com opção 'Executar Todas' e detalhes."""
-    opcoes_categoria = ["🔥 Executar TODAS as Ferramentas"] + list(categorias.keys()) + ["⬅️  Voltar"]
+    opcoes_categoria = ["🔥 DEPLOY FULL ARSENAL (All Tools)"] + list(categorias.keys()) + ["⬅️  ABORT / RETURN"]
 
     cat_escolha = questionary.select(
-        "Qual categoria deseja explorar?",
+        "SELECT TACTICAL CATEGORY:",
         choices=opcoes_categoria
     ).ask()
 
-    if cat_escolha == "⬅️  Voltar" or not cat_escolha:
+    if cat_escolha == "⬅️  ABORT / RETURN" or not cat_escolha:
         return []
 
     # ── "Executar Todas" ─────────────────────────────────────────────
-    if cat_escolha == "🔥 Executar TODAS as Ferramentas":
+    if cat_escolha == "🔥 DEPLOY FULL ARSENAL (All Tools)":
         todos_plugins = []
         for cat_plugins in categorias.values():
             todos_plugins.extend(cat_plugins)
 
-        console.print(f"\n[bold yellow]⚡ {len(todos_plugins)} ferramentas selecionadas de {len(categorias)} categorias.[/bold yellow]")
+        console.print(f"\n[bold yellow]⚡ {len(todos_plugins)} TACTICAL TOOLS ARMED FOR DEPLOYMENT.[/bold yellow]")
 
         confirma = questionary.confirm(
-            f"Deseja executar todas as {len(todos_plugins)} ferramentas?", default=True
+            f"CONFIRM FULL DEPLOYMENT ({len(todos_plugins)} tools)?", default=True
         ).ask()
 
         if confirma:
@@ -96,18 +96,18 @@ def escolher_plugins_manual(categorias: dict) -> list:
     cat_plugins = categorias[cat_escolha]
 
     # Mostrar detalhes de cada ferramenta da categoria antes de selecionar
-    console.print(f"\n[bold cyan]🛠️  Ferramentas em {cat_escolha}:[/bold cyan]\n")
+    console.print(f"\n[bold cyan]🛰️  AVAILABLE ASSETS IN {cat_escolha.upper()}:[/bold cyan]\n")
     for p in cat_plugins:
         _mostrar_detalhes_ferramenta(p)
     console.print()
 
     opcoes = [
-        questionary.Choice(f"{p['name']} - {p.get('description', '')}", value=p, checked=True)
+        questionary.Choice(f"{p['name']} — {p.get('description', '')}", value=p, checked=True)
         for p in cat_plugins
     ]
 
     return questionary.checkbox(
-        f"Escolha as ferramentas em {cat_escolha}:",
+        f"SELECT ASSETS IN {cat_escolha.upper()}:",
         choices=opcoes
     ).ask() or []
 
@@ -172,12 +172,13 @@ def perguntar_parametros_auto() -> dict:
 
 
 def menu_exportacao(alvo: str) -> list:
+    """Intelligence Export Menu."""
     return questionary.checkbox(
-        f"Como deseja exportar os resultados?",
+        f"ARCHIVE FORMATS FOR {alvo.upper()}:",
         choices=[
-            {"name": "📄 PDF (Relatório Profissional)", "value": "pdf", "checked": True},
-            {"name": "📊 Grafo de Entidades (HTML)", "value": "grafo", "checked": True},
-            {"name": "JSON (Dados Brutos)", "value": "json"},
-            {"name": "CSV (Planilha)", "value": "csv"}
+            {"name": "📄 DIGITAL DOSSIER (Premium PDF)", "value": "pdf", "checked": True},
+            {"name": "📊 ENTITY RELATIONSHIP GRAPH (Interactive HTML)", "value": "grafo", "checked": True},
+            {"name": "📀 RAW INTEL (JSON)", "value": "json"},
+            {"name": "📋 TABULAR DATA (CSV)", "value": "csv"}
         ]
     ).ask() or []

@@ -18,28 +18,71 @@ PATTERNS = {
     EntityType.EMAIL: r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
     EntityType.IP: r'\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b',
     EntityType.DOMAIN: r'(?<!@)\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b',
-    EntityType.PHONE: r'(?:\+?\d{1,3}[\s.-]?)?(?:\(?\d{2,4}\)?[\s.-]?)?\d{3,5}[\s.-]?\d{4}',
+    EntityType.PHONE: r'(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?9?\d{4}[-.\s]?\d{4}',
     EntityType.URL: r'https?://[^\s"\'<>]+',
     EntityType.USERNAME: r'(?<![\w.-])@([a-zA-Z0-9._-]{3,30})',
     EntityType.HASH: r'\b[a-fA-F0-9]{32,64}\b',
     EntityType.CRYPTO_WALLET: r'\b(?:bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}\b|0x[a-fA-F0-9]{40}',
+    # Brazilian Specifics
+    EntityType.CPF: r'\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b',
+    EntityType.CNPJ: r'\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b',
+    "DATE": r'\d{2}[/-]\d{2}[/-]\d{4}',
 }
 
 # Noise words (don't treat common names/fragments as useful usernames/leads)
 NOISE_WORDS = {
     "maria", "vitoria", "jose", "santos", "silva", "oliveira", "souza", "pereira",
     "costa", "carvalho", "alves", "ferreira", "barboza", "gonçalves", "martins",
+    "rodrigues", "da silva", "dos santos", "melo", "cardoso", "teixeira",
     "admin", "root", "test", "null", "undefined", "true", "false", "user", "guest",
     "login", "proxy", "server", "client", "default", "none",
     "dos", "da", "de", "do", "das", "pelo", "pela", "index", "home", "search",
-    "senha", "password"
+    "senha", "password", "whatsapp", "vcard", "charset", "encoding"
 }
 
 # Noise filters
-IGNORE_IPS = {"127.0.0.1", "0.0.0.0", "255.255.255.255"}
+IGNORE_IPS = {"127.0.0.1", "0.0.0.0", "255.255.255.255", "8.8.8.8", "8.8.4.4", "1.1.1.1"}
 IGNORE_DOMAINS = {"example.com", "localhost", "github.com", "docker.com", "googleapis.com", 
-                  "schemas.microsoft.com", "w3.org", "w.org", "purl.org"}
-IGNORE_EMAILS = {"noreply@", "no-reply@", "postmaster@", "mailer-daemon@", "admin@", "test@"}
+                  "schemas.microsoft.com", "w3.org", "w.org", "purl.org", "schema.org", "google.com", "bing.com"}
+IGNORE_EMAILS = {"noreply@", "no-reply@", "postmaster@", "mailer-daemon@", "admin@", "test@", "support@", "contato@"}
+
+# Technical Noise Signatures (Tool failures, empty hits, etc.)
+NOISE_SIGNATURES = [
+    "no information available", "no address for", "failed to resolve",
+    "name does not resolve", "could not resolve hostname", "stat 3a",
+    "authentication failed", "unauthorized", "access denied",
+    "invalid api key", "hibp-api-key", "wrong ip", "invalid query",
+    "scan aborted", "could not run nuclei", "no templates provided",
+    "no assets were discovered", "failed to resolve", "fatal: invalid url",
+    "sh: 1: shodan: not found", "unable to find image", "pull access denied",
+    "did not return any results", "no matches found", "zero results",
+    "sem vcard", "sem whats", "unknown error", "required module not found",
+    "sh: syntax error", "jq: error", "invalid host"
+]
+
+def is_meaningful_result(res: ScanResult) -> bool:
+    """
+    Determines if a scan result contains useful data or just technical noise.
+    """
+    saida = str(res.raw_output).lower().strip()
+    
+    # Empty output is noise
+    if not saida:
+        return False
+        
+    # Check for known noise signatures
+    if any(sig in saida for sig in NOISE_SIGNATURES):
+        return False
+        
+    # Check if it's just a common banner/art without data
+    if len(saida) < 10 and not re.search(r'[a-zA-Z0-9]', saida):
+        return False
+        
+    # Special case: WPScan banner without findings
+    if "wpscan team" in saida and "scan aborted" in saida:
+        return False
+
+    return True
 
 def strip_ansi(texto: str) -> str:
     """Removes terminal color codes before regex processing."""
@@ -120,15 +163,33 @@ def extrair_insights(resultados: List[ScanResult]) -> Dict[str, Any]:
     all_entities: list[Entity] = []
     alertas = []
     entity_sources: dict[str, set] = {}  # value -> set of tools
+    resultados_positivos = []
+    resultados_ruido = []
 
     for res in resultados:
         ferramenta = res.plugin_name
         saida = str(res.raw_output)
         alvo = res.target
 
-        # Extract entities
+        # Check for meaningful data
+        relevante = is_meaningful_result(res)
+        
+        # Extract and merge entities
         entities = extrair_entidades(saida, source_tool=ferramenta, source_target=alvo)
+        
+        # Merge already structured entities if present
+        if res.entities_found:
+            for e in res.entities_found:
+                if not e.source_tool: e.source_tool = ferramenta
+                if not e.source_target: e.source_target = alvo
+                entities.append(e)
+
         all_entities.extend(entities)
+
+        if relevante or entities:
+            resultados_positivos.append(res)
+        else:
+            resultados_ruido.append(res)
 
         # Track which tools found each entity
         for e in entities:
@@ -178,11 +239,14 @@ def extrair_insights(resultados: List[ScanResult]) -> Dict[str, Any]:
 
     return {
         "entities": list(unique_entities.values()),
-        "by_type": {k.value: [e.value for e in v] for k, v in by_type.items()},
+        "by_type": {k.value: v for k, v in by_type.items()},
         "correlacoes": correlacoes,
         "alertas": alertas,
         "total_raw": len(all_entities),
         "total_unique": len(unique_entities),
+        "total_correlations": len(correlacoes),
+        "positivos": resultados_positivos,
+        "ruido": resultados_ruido
     }
 
 
@@ -198,65 +262,77 @@ def exibir_dashboard_inteligencia(insights: Dict[str, Any]):
 
     # Main stats table
     stats_table = Table(show_header=False, box=None, padding=(0, 2))
-    stats_table.add_column(style="cyan", justify="right")
+    stats_table.add_column(style="bright_blue", justify="right")
     stats_table.add_column(style="white")
-    stats_table.add_row("Entidades únicas:", str(insights.get("total_unique", 0)))
-    stats_table.add_row("Correlações:", f"[bold yellow]{len(correlacoes)}[/bold yellow]")
+    stats_table.add_row("UNIQUE TARGETS:", str(insights.get("total_unique", 0)))
+    stats_table.add_row("CROSS-TOOL CORRELATIONS:", f"[bold yellow]{len(correlacoes)}[/bold yellow]")
+    stats_table.add_row("HIGH-RISK ALERTS:", f"[bold red]{len(alertas)}[/bold red]")
 
-    console.print(Panel(stats_table, title="[bold]📊 Resumo Rápido[/bold]", border_style="blue"))
+    console.print(Panel(stats_table, title="[bold white]🛰️ INTELLIGENCE SUMMARY[/bold white]", border_style="bright_black"))
 
     # Entity breakdown table
     if by_type:
         entity_table = Table(
-            title="🧠 Inteligência Correlacionada",
+            title="[bold yellow]🧠 CROSS-CORRELATED INTELLIGENCE[/bold yellow]",
             show_header=True,
-            header_style="bold magenta",
-            expand=True
+            header_style="bold bright_blue",
+            expand=True,
+            border_style="bright_black"
         )
-        entity_table.add_column("Tipo", style="dim", width=20)
-        entity_table.add_column("Descobertas", style="white")
-        entity_table.add_column("Qtd", style="cyan", width=6, justify="center")
+        entity_table.add_column("CLASSIFICATION", style="dim", width=20)
+        entity_table.add_column("DISCOVERED ASSETS", style="white")
+        entity_table.add_column("COUNT", style="bright_cyan", width=6, justify="center")
 
         type_emojis = {
             "email": "📧", "ip": "🌐", "domain": "🔗", "username": "👤",
             "phone": "📱", "url": "🔗", "hash": "#️⃣", "crypto": "₿",
-            "social_profile": "📲"
+            "social_profile": "📲", "CPF": "🪪", "CNPJ": "🏢", "DATE": "📅"
         }
 
-        for tipo, valores in by_type.items():
+        for tipo, entities in sorted(by_type.items()):
             emoji = type_emojis.get(tipo, "🔹")
-            # Deduplicate by value within the type
-            unique_vals = list(dict.fromkeys(valores))
+            # Extrair valores únicos das entidades
+            unique_vals = list(dict.fromkeys([e.value for e in entities]))
             display_values = ", ".join(unique_vals[:5])
             if len(unique_vals) > 5:
-                display_values += f" (+{len(unique_vals) - 5})"
+                display_values += f" [dim](+{len(unique_vals) - 5} more)[/dim]"
             entity_table.add_row(f"{emoji} {tipo.upper()}", display_values, str(len(unique_vals)))
 
-        console.print(Panel(entity_table, border_style="magenta"))
+        console.print(Panel(entity_table, border_style="bright_blue"))
 
     # Correlation highlights
     if correlacoes:
         corr_table = Table(
-            title="🔥 Correlações e Nós Centrais",
+            title="[bold red]🔥 CENTRAL NODES & SIGNAL CORRELATIONS[/bold red]",
             show_header=True,
             header_style="bold yellow",
-            expand=True
+            expand=True,
+            border_style="bright_black"
         )
-        corr_table.add_column("Score", style="bold yellow", width=10, justify="center")
-        corr_table.add_column("Valor", style="white")
-        corr_table.add_column("Fontes (Ferramentas)", style="dim")
-        corr_table.add_column("Origens Cruzadas", style="cyan")
+        corr_table.add_column("CONFIDENCE", style="bold yellow", width=12, justify="center")
+        corr_table.add_column("IDENTITY / ASSET", style="white")
+        corr_table.add_column("TACTICAL SOURCES", style="dim")
+        corr_table.add_column("PIVOTS", style="bright_cyan")
 
         for c in correlacoes[:10]:
-            is_central = c["score"] >= 5
-            score_text = f"🚨 [red]{c['score']}[/red]" if is_central else f"⭐ {c['score']}"
-            valor_text = f"[bold red]{c['value'][:50]}[/bold red]" if is_central else c["value"][:50]
+            is_high = c["score"] >= 8
+            is_medium = c["score"] >= 4
+            
+            if is_high:
+                score_text = f"🚨 [bold red]CRITICAL ({c['score']})[/bold red]"
+                valor_text = f"[bold red]{c['value'][:50]}[/bold red]"
+            elif is_medium:
+                score_text = f"⚡ [yellow]HIGH ({c['score']})[/yellow]"
+                valor_text = f"[bold white]{c['value'][:50]}[/bold white]"
+            else:
+                score_text = f"⭐ [dim]LOW ({c['score']})[/dim]"
+                valor_text = f"[dim]{c['value'][:50]}[/dim]"
             
             corr_table.add_row(
                 score_text,
                 valor_text,
                 ", ".join(c["tools"][:4]),
-                str(len(c["source_targets"])) + " origens"
+                f"{len(c['source_targets'])} origins"
             )
 
         console.print(Panel(corr_table, border_style="yellow"))
