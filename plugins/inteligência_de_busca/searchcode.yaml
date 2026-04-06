@@ -1,0 +1,9 @@
+name: searchcode
+category: 🧠 Inteligência de Busca
+description: Motor de busca de APIs, bibliotecas e trechos de código livre.
+command: curl -s 'https://searchcode.com/api/codesearch_I/?q={alvo}'
+inputs:
+- id: alvo
+  prompt: 'Termo de busca código:'
+timeout: 30
+safe: true

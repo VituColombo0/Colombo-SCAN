@@ -1,0 +1,9 @@
+name: intelx
+category: 🔐 Vazamentos Profundos
+description: 'IntelligenceX: pesquisa sobre vazamentos de dados, domínios, etc.'
+command: curl -s -H "x-key: {env.INTELX_API_KEY}" 'https://2.intelx.io/phonebook/search?term={alvo}'
+inputs:
+- id: alvo
+  prompt: 'Email, IP, Domínio ou Bitcoin address:'
+timeout: 15
+safe: true

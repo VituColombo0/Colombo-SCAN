@@ -3,7 +3,7 @@ category: 📧 Análise de Emails
 description: Hunter Pattern plugin
 type: docker
 image: curlimages/curl
-command: -s 'https://api.hunter.io/v2/domain-search?domain={alvo}'
+command: -s 'https://api.hunter.io/v2/domain-search?domain={alvo}&api_key={env.HUNTER_API_KEY}'
 inputs:
 - id: alvo
   prompt: 'Digite o alvo para Hunter Pattern:'

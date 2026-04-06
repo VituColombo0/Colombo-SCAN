@@ -1,0 +1,9 @@
+name: grep_app
+category: 🛡️ DevSecOps & Vulnerabilidades
+description: Busca massiva por código em repositórios do GitHub.
+command: curl -s -A "Mozilla/5.0" 'https://grep.app/api/search?q={alvo}'
+inputs:
+- id: alvo
+  prompt: 'Padrão de código regex ou termo:'
+timeout: 30
+safe: true

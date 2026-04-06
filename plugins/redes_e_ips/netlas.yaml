@@ -1,0 +1,9 @@
+name: netlas
+category: 🌐 Redes e IPs
+description: Plataforma de descoberta de superfície de ataque e inteligência.
+command: curl -H "X-API-Key: {env.NETLAS_API_KEY}" -s 'https://app.netlas.io/api/responses_filter/?q={alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP ou Domínio alvo:'
+timeout: 35
+safe: true

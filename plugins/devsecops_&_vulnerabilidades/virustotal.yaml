@@ -1,0 +1,9 @@
+name: virustotal
+category: 🛡️ DevSecOps & Vulnerabilidades
+description: Ferramenta suprema de detecção de vírus em arquivos/URLs/IPs.
+command: curl -s -H "x-apikey: {env.VIRUSTOTAL_API_KEY}" 'https://www.virustotal.com/api/v3/search?query={alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP, Domínio, Hash ou URL alvo:'
+timeout: 30
+safe: true

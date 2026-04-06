@@ -1,0 +1,9 @@
+name: dorksearch
+category: 🧠 Inteligência de Busca
+description: Pesquisa automatizada via Google Dorks.
+command: 'echo ''Acesse para utilizar dorks pré-prontas sobre o alvo: https://dorksearch.com/?q={alvo}'''
+inputs:
+- id: alvo
+  prompt: 'Termo ou Domínio:'
+timeout: 10
+safe: true

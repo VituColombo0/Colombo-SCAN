@@ -1,0 +1,9 @@
+name: fullhunt
+category: 🕸️ Mapeamento de Superfície
+description: Plataforma de mapeamento contínuo de superfície de ataque.
+command: curl -s -H "X-API-Key: {env.FULLHUNT_API_KEY}" 'https://fullhunt.io/api/v1/domain/{alvo}/details'
+inputs:
+- id: alvo
+  prompt: 'Domínio alvo:'
+timeout: 30
+safe: true

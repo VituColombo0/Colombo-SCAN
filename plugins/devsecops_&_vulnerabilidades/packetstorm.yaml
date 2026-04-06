@@ -1,0 +1,9 @@
+name: packetstorm
+category: 🛡️ DevSecOps & Vulnerabilidades
+description: Recursos de segurança e base de dados de vulnerabilidades.
+command: 'echo ''Busca em PacketStorm: https://packetstormsecurity.com/search/?q={alvo}'''
+inputs:
+- id: alvo
+  prompt: 'Termo de busca vazamento/vuln:'
+timeout: 10
+safe: true

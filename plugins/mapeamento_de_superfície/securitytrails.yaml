@@ -1,0 +1,9 @@
+name: securitytrails
+category: 🕸️ Mapeamento de Superfície
+description: Plataforma de dados sobre domínios, DNS histórico e subdomínios.
+command: curl -s -H "APIKEY: {env.SECURITYTRAILS_API_KEY}" 'https://api.securitytrails.com/v1/domain/{alvo}/subdomains'
+inputs:
+- id: alvo
+  prompt: 'Domínio alvo:'
+timeout: 45
+safe: true

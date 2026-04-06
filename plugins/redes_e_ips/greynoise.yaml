@@ -1,0 +1,9 @@
+name: greynoise
+category: 🌐 Redes e IPs
+description: Busca inteligência sobre IPs ruidosos e atividades de scan na internet.
+command: curl -s 'https://api.greynoise.io/v3/community/{alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP alvo:'
+timeout: 30
+safe: true

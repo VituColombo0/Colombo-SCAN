@@ -3,7 +3,7 @@ category: 📡 Shodan / Dispositivos IoT
 description: Fofa API plugin
 type: docker
 image: curlimages/curl
-command: -s 'https://fofa.info/api/v1/search/all?qbase64={alvo}'
+command: -s 'https://fofa.info/api/v1/search/all?email={env.FOFA_EMAIL}&key={env.FOFA_KEY}&qbase64={alvo}'
 inputs:
 - id: alvo
   prompt: 'Query em base64:'

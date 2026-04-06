@@ -1,0 +1,9 @@
+name: onyphe
+category: 💻 IoT e Dispositivos
+description: Busca informações sobre IPs e dispositivos no cyber defense engine Onyphe.
+command: curl -s -H "Authorization: Bearer {env.ONYPHE_API_KEY}" 'https://www.onyphe.io/api/v2/search/simple?term={alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP ou Domínio alvo:'
+timeout: 30
+safe: true

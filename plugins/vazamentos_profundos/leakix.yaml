@@ -1,0 +1,9 @@
+name: leakix
+category: 🔐 Vazamentos Profundos
+description: Buscador de informações sobre infraestrutura esquecida e exposta.
+command: curl -s 'https://leakix.net/api/public/host/{alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP ou subrede alvo:'
+timeout: 30
+safe: true

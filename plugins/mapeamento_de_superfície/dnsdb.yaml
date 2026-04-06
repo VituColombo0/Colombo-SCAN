@@ -1,0 +1,9 @@
+name: dnsdb
+category: 🕸️ Mapeamento de Superfície
+description: Pesquisas sobre infraestrutura de DNS histórica Farsight.
+command: curl -s -H "X-API-Key: {env.DNSDB_API_KEY}" 'https://api.dnsdb.info/lookup/rrset/name/{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Domínio alvo:'
+timeout: 30
+safe: true

@@ -1,0 +1,9 @@
+name: vulners
+category: 🛡️ DevSecOps & Vulnerabilidades
+description: Base de dados e pesquisa de vulnerabilidades sobre tecnologias específicas.
+command: curl -s 'https://vulners.com/api/v3/search/lucene/?query={alvo}&apikey={env.VULNERS_API_KEY}'
+inputs:
+- id: alvo
+  prompt: 'Termo da busca de vuln:'
+timeout: 30
+safe: true

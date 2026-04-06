@@ -1,0 +1,9 @@
+name: urlscan
+category: 🕸️ Mapeamento de Superfície
+description: Scan completo de sites, análise de requests, imagens e tecnologias.
+command: curl -s 'https://urlscan.io/api/v1/search/?q=domain:{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Domínio ou URL alvo:'
+timeout: 45
+safe: true

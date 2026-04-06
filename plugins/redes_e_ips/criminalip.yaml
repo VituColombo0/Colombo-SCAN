@@ -1,0 +1,9 @@
+name: criminalip
+category: 🌐 Redes e IPs
+description: Assessment de risco e inventário de assets sobre o IP.
+command: curl -H "x-api-key: {env.CRIMINALIP_API_KEY}" -s 'https://api.criminalip.io/v1/asset/ip/report?ip={alvo}'
+inputs:
+- id: alvo
+  prompt: 'IP alvo:'
+timeout: 35
+safe: true

@@ -5,3 +5,5 @@ __pycache__/
 data/
 logs/
 relatorios/
+.scan_auth.yaml
+*.log

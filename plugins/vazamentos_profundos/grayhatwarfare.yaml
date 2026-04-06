@@ -1,0 +1,9 @@
+name: grayhatwarfare
+category: 🔐 Vazamentos Profundos
+description: Buscador de baldes abertos da AWS/S3 e Azure.
+command: curl -s 'https://api.grayhatwarfare.com/files/search/{alvo}?key={env.GRAYHATWARFARE_API_KEY}'
+inputs:
+- id: alvo
+  prompt: 'Keyword alvo:'
+timeout: 30
+safe: true

@@ -1,0 +1,9 @@
+name: publicwww
+category: 🧠 Inteligência de Busca
+description: Buscador de trechos de código fonte no corpo das páginas web.
+command: curl -s 'https://publicwww.com/websites/{alvo}/?export=csv&key={env.PUBLICWWW_API_KEY}'
+inputs:
+- id: alvo
+  prompt: 'Snippet de código ou ID alvo:'
+timeout: 40
+safe: true

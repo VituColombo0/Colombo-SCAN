@@ -1,0 +1,9 @@
+name: pulsedive
+category: 🌐 Redes e IPs
+description: Motor de busca sobre ameaças e inteligência cibernética.
+command: curl -s 'https://pulsedive.com/api/info.php?indicator={alvo}&key={env.PULSEDIVE_API_KEY}'
+inputs:
+- id: alvo
+  prompt: 'IP, Domínio ou Hash alvo:'
+timeout: 30
+safe: true

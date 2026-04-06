@@ -1,0 +1,9 @@
+name: polyswarm
+category: 🛡️ DevSecOps & Vulnerabilidades
+description: Marketspace de detecção de ameaças de malware via hash.
+command: curl -s -H "x-api-key: {env.POLYSWARM_API_KEY}" 'https://api.polyswarm.network/v2/search/hash/sha256/{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Hash SHA256 alvo:'
+timeout: 30
+safe: true
