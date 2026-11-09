@@ -1,0 +1,10 @@
+name: Cloud_enum
+category: 🗺️ Mapeamento de Superfície
+description: Enumera ativos públicos expostos em AWS, Azure e GCP (buckets S3, blobs, apps) associados a um nome/palavra-chave corporativa.
+author: initstring
+command: cloud_enum -k {alvo}
+inputs:
+- id: alvo
+  prompt: 'Palavra-chave / nome da empresa:'
+timeout: 300
+safe: true

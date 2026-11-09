@@ -1,0 +1,12 @@
+name: Semgrep
+category: 🛡️ DevSecOps & Vulnerabilidades
+description: SAST semântico rápido com 3000+ regras da comunidade cobrindo 30+ linguagens. Detecta padrões de vulnerabilidade diretamente no código-fonte.
+author: semgrep
+type: docker
+image: semgrep/semgrep
+command: 'semgrep --config auto --error {alvo}'
+inputs:
+- id: alvo
+  prompt: 'Caminho/URL do código-fonte alvo:'
+timeout: 300
+safe: true

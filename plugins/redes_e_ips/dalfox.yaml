@@ -1,0 +1,12 @@
+name: Dalfox
+category: 🌐 Redes e IPs
+description: Scanner de XSS (Cross-Site Scripting) extremamente rápido em Go, com análise de parâmetros e verificação de payloads. Padrão para caça de XSS.
+author: hahwul
+type: docker
+image: hahwul/dalfox
+command: 'url {alvo}'
+inputs:
+- id: alvo
+  prompt: 'URL alvo com parâmetro (https://site/?q=1):'
+timeout: 300
+safe: false

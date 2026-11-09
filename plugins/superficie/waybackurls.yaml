@@ -1,0 +1,10 @@
+name: Waybackurls
+category: 🕸️ Attack Surface Mapping
+description: Busca todas as URLs já arquivadas de um domínio na Wayback Machine. Ideal para recuperar rotas, parâmetros e arquivos removidos.
+author: tomnomnom
+command: waybackurls {alvo}
+inputs:
+- id: alvo
+  prompt: 'Domínio alvo:'
+timeout: 120
+safe: true

@@ -1,0 +1,12 @@
+name: Holehe
+category: 📧 Análise de Emails
+description: Verifica em mais de 120 sites (Twitter, Instagram, Spotify...) se um e-mail possui conta registrada, usando o fluxo de "esqueci a senha" sem alertar o alvo.
+author: megadose
+type: docker
+image: tgscd/holehe
+command: '{alvo} --only-used'
+inputs:
+- id: alvo
+  prompt: 'E-mail alvo:'
+timeout: 120
+safe: true

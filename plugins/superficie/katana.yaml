@@ -1,0 +1,12 @@
+name: ProjectDiscovery Katana
+category: 🕸️ Attack Surface Mapping
+description: Crawler/spider web de última geração. Mapeia endpoints, parâmetros e rotas JS de forma rápida e headless. Padrão da indústria para descoberta de superfície.
+author: ProjectDiscovery
+type: docker
+image: projectdiscovery/katana
+command: '-u {alvo} -silent -jc'
+inputs:
+- id: alvo
+  prompt: 'URL alvo (https://...):'
+timeout: 300
+safe: true

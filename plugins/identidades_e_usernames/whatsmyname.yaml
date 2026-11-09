@@ -1,0 +1,10 @@
+name: WhatsMyName
+category: 👤 Identidades e Usernames
+description: Enumeração de presença de username em 600+ sites usando a base comunitária WhatsMyName (projeto OSINT de referência mantido ativamente).
+author: WebBreacher
+command: whatsmyname -u {alvo}
+inputs:
+- id: alvo
+  prompt: 'Username alvo:'
+timeout: 180
+safe: true

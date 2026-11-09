@@ -1,0 +1,10 @@
+name: GAU (GetAllURLs)
+category: 🕸️ Attack Surface Mapping
+description: Extrai URLs conhecidas de um domínio a partir de Wayback Machine, Common Crawl, OTX e URLScan. Excelente para encontrar endpoints antigos e esquecidos.
+author: lc
+command: gau {alvo}
+inputs:
+- id: alvo
+  prompt: 'Domínio alvo:'
+timeout: 180
+safe: true

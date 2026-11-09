@@ -1,0 +1,12 @@
+name: h8mail
+category: 📧 Análise de Emails
+description: Caçador de vazamentos de credenciais. Cruza o e-mail com bases de dados públicas e APIs de breach (HIBP, Snusbase, etc).
+author: khast3x
+type: docker
+image: khast3x/h8mail
+command: '-t {alvo}'
+inputs:
+- id: alvo
+  prompt: 'E-mail alvo:'
+timeout: 120
+safe: true

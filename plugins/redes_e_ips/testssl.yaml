@@ -1,0 +1,12 @@
+name: testssl.sh
+category: 🌐 Redes e IPs
+description: 'Auditoria completa de TLS/SSL de um host — protocolos, cifras, vulnerabilidades (Heartbleed, ROBOT, etc), validade e força do certificado.'
+author: drwetter
+type: docker
+image: drwetter/testssl.sh
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Host alvo (dominio.com ou dominio.com:443):'
+timeout: 300
+safe: true

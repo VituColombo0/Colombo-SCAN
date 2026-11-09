@@ -1,0 +1,12 @@
+name: ProjectDiscovery DNSx
+category: 🌐 Redes e IPs
+description: Toolkit DNS rápido e multifuncional (resolução, brute de subdomínios, consulta de registros A/AAAA/CNAME/TXT em massa).
+author: ProjectDiscovery
+type: docker
+image: projectdiscovery/dnsx
+command: '-d {alvo} -silent -a -resp'
+inputs:
+- id: alvo
+  prompt: 'Domínio alvo:'
+timeout: 180
+safe: true

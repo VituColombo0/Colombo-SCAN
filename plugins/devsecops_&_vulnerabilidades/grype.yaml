@@ -1,0 +1,12 @@
+name: Grype
+category: 🛡️ DevSecOps & Vulnerabilidades
+description: Scanner de vulnerabilidades da Anchore para imagens de contêiner e filesystems, com baixa taxa de falsos positivos no matching de CVEs.
+author: anchore
+type: docker
+image: anchore/grype
+command: '{alvo}'
+inputs:
+- id: alvo
+  prompt: 'Imagem/alvo (ex: nginx:latest ou dir:/path):'
+timeout: 300
+safe: true

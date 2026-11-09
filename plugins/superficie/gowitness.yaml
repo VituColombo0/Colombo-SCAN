@@ -1,0 +1,10 @@
+name: GoWitness
+category: 🕸️ Attack Surface Mapping
+description: Captura screenshots de páginas web via Chrome headless, gerando evidência visual rápida da superfície de ataque.
+author: sensepost
+command: gowitness single --url {alvo}
+inputs:
+- id: alvo
+  prompt: 'URL alvo (https://...):'
+timeout: 120
+safe: true

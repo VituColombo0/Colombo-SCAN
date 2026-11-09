@@ -1,0 +1,10 @@
+name: DNSRecon
+category: 🌐 Redes e IPs
+description: 'Enumeração DNS avançada — registros padrão, transferência de zona (AXFR), brute de subdomínios e reverse lookup de ranges.'
+author: darkoperator
+command: dnsrecon -d {alvo}
+inputs:
+- id: alvo
+  prompt: 'Domínio alvo:'
+timeout: 180
+safe: true

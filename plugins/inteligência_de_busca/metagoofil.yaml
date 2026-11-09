@@ -1,0 +1,10 @@
+name: Metagoofil
+category: 🔎 Inteligência de Busca
+description: Coleta documentos públicos (pdf, docx, xlsx) indexados de um domínio e extrai metadados (autores, softwares, caminhos internos, usuários).
+author: laramies
+command: metagoofil -d {alvo} -t pdf,doc,docx,xls,xlsx -l 50 -n 10
+inputs:
+- id: alvo
+  prompt: 'Domínio alvo:'
+timeout: 300
+safe: true

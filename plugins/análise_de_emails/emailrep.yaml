@@ -1,0 +1,9 @@
+name: EmailRep
+category: 📧 Análise de Emails
+description: 'Reputação e perfil de risco de um e-mail (idade, exposição em vazamentos, perfis vinculados, suspeita de malicioso) via API pública EmailRep.io.'
+command: 'curl -s "https://emailrep.io/{alvo}" -H "User-Agent: colombo-scan" | jq .'
+inputs:
+- id: alvo
+  prompt: 'E-mail alvo:'
+timeout: 30
+safe: true
