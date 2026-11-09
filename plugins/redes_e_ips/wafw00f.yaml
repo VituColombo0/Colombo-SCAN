@@ -1,0 +1,10 @@
+name: wafw00f
+category: 🌐 Redes e IPs
+description: Identifica e fingerprinta Web Application Firewalls (WAF) protegendo um alvo. Essencial antes de qualquer teste ativo.
+author: EnableSecurity
+command: wafw00f {alvo}
+inputs:
+- id: alvo
+  prompt: 'URL alvo (https://...):'
+timeout: 60
+safe: true

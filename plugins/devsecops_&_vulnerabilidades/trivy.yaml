@@ -1,0 +1,12 @@
+name: Trivy
+category: 🛡️ DevSecOps & Vulnerabilidades
+description: Scanner universal da Aqua Security. Analisa repositórios, imagens e filesystems em busca de CVEs em dependências, segredos e erros de configuração.
+author: aquasecurity
+type: docker
+image: aquasec/trivy
+command: 'repo {alvo}'
+inputs:
+- id: alvo
+  prompt: 'URL do repositório Git alvo:'
+timeout: 300
+safe: true

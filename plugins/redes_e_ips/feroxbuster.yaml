@@ -1,0 +1,10 @@
+name: Feroxbuster
+category: 🌐 Redes e IPs
+description: Brute-force recursivo de conteúdo e diretórios (content discovery) em Rust, rápido e com recursão automática.
+author: epi052
+command: feroxbuster -u {alvo} --silent -d 2
+inputs:
+- id: alvo
+  prompt: 'URL alvo (https://...):'
+timeout: 300
+safe: false

@@ -1,0 +1,10 @@
+name: Instaloader
+category: 💬 Redes Sociais
+description: Extrai metadados públicos de um perfil do Instagram (bio, nº de posts/seguidores, foto de perfil em HD) sem baixar as mídias.
+author: instaloader
+command: instaloader --no-pictures --no-videos --no-video-thumbnails --no-compress-json {alvo}
+inputs:
+- id: alvo
+  prompt: 'Username do Instagram:'
+timeout: 120
+safe: true

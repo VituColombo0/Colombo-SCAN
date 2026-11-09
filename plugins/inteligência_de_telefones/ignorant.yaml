@@ -1,0 +1,12 @@
+name: Ignorant
+category: 📱 Inteligência de Telefones
+description: Verifica se um número de telefone está registrado em sites como Instagram, Amazon e Snapchat (irmão do Holehe). Informe o código do país seguido do número.
+author: megadose
+command: ignorant {codigo_pais} {alvo} --only-used
+inputs:
+- id: codigo_pais
+  prompt: 'Código do país (ex 55 Brasil, 33 França):'
+- id: alvo
+  prompt: 'Número (sem DDI, apenas dígitos):'
+timeout: 120
+safe: true

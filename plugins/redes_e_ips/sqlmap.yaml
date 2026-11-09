@@ -1,0 +1,10 @@
+name: SQLMap
+category: 🌐 Redes e IPs
+description: Ferramenta de referência para detecção e exploração automatizada de SQL Injection. Rodada em modo batch e não-destrutivo (enumeração apenas).
+author: sqlmapproject
+command: sqlmap -u "{alvo}" --batch --level=1 --risk=1 --random-agent
+inputs:
+- id: alvo
+  prompt: 'URL alvo com parâmetro (https://site/?id=1):'
+timeout: 600
+safe: false
