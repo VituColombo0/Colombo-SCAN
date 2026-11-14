@@ -1,174 +1,174 @@
-# Colombo_SCAN: Framework Tático de Inteligência e OSINT
+# Colombo-SCAN
 
-Framework modular de alta performance para reconhecimento tático, coleta de fontes abertas (OSINT) e análise forense digital, orquestrando ferramentas especializadas em contêineres Docker isolados com execução concorrente e geração de dossiês.
+> Framework de OSINT e perícia digital que identifica o tipo de alvo, roda plugins em contêineres Docker isolados e gera dossiês com grafo de relacionamentos.
 
-[![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Containers: Docker](https://img.shields.io/badge/Sandboxing-Docker%20Hardened-2496ED.svg)](https://www.docker.com/)
-[![API: FastAPI](https://img.shields.io/badge/API-FastAPI%20Swagger-009688.svg)](https://fastapi.tiangolo.com/)
-[![Interface: Rich & Questionary](https://img.shields.io/badge/CLI-Rich%20%26%20Questionary-darkgreen.svg)](https://github.com/Textualize/rich)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue) ![Plugins](https://img.shields.io/badge/plugins-167-orange) ![Docker](https://img.shields.io/badge/sandbox-Docker-2496ED) ![API](https://img.shields.io/badge/API-FastAPI-009688)
 
----
+> [!CAUTION]
+> Uso exclusivo para fins defensivos, perícia legalmente autorizada, ensino e auditorias autorizadas
+> (bug bounty com permissão expressa). Respeite a LGPD e os termos de uso de cada API consultada.
+> Os autores não se responsabilizam por uso indevido.
 
-## Visão Geral
+## Sumário
 
-O **Colombo_SCAN** automatiza o ciclo completo de inteligência investigativa em fontes abertas. Ele elimina a contaminação do ambiente host executando ferramentas de terceiros em contêineres Docker efêmeros, normaliza entidades de alvos heterogêneos e consolida os achados em relatórios visuais com grafos de relacionamentos e sumários executivos.
+- [Sobre](#sobre) · [Funcionalidades](#funcionalidades) · [Arquitetura](#arquitetura) · [Requisitos](#requisitos)
+- [Instalação](#instalação) · [Uso](#uso) · [Configuração](#configuração) · [Plugins](#plugins)
+- [Testes](#testes) · [Estrutura do projeto](#estrutura-do-projeto) · [Licença](#licença)
 
-```
-                     Entrada Bruta do Investigador
-     (Email, Domínio, IP, CPF, CNPJ, Placa de Veículo, Crypto Wallet)
-                                   │
-                                   ▼
-                   [ Smart Entity Parser & Normalizer ]
-                       Identificação e validação
-                                   │
-                                   ▼
-                   [ Motor Central (Core Engine) ]
-              Orquestração paralela via ThreadPoolExecutor
-                                   │
-         ┌─────────────────────────┼─────────────────────────┐
-         ▼                         ▼                         ▼
-   [ Plugin YAML 1 ]         [ Plugin YAML 2 ]         [ Plugin YAML N ]
-   Docker Sandbox A          Docker Sandbox B          Docker Sandbox N
-         │                         │                         │
-         └─────────────────────────┼─────────────────────────┘
-                                   │
-                                   ▼
-                   [ Gestão de Casos (SQLite) ]
-                                   │
-         ┌─────────────────────────┴─────────────────────────┐
-         ▼                                                   ▼
-[ Dossiês & Grafos ]                               [ API REST Integrada ]
-PDFs, HTML Graphs e JSON                           FastAPI (:8000/docs)
-```
+## Sobre
 
----
+O Colombo-SCAN automatiza a investigação em fontes abertas. O investigador informa um ou mais
+alvos (e-mail, domínio, IP, telefone, CPF, CNPJ, placa, carteira cripto…); o sistema reconhece e
+normaliza cada um, escolhe os plugins compatíveis, roda cada ferramenta num contêiner Docker
+descartável (sem sujar a máquina) e consolida os achados em casos, grafos e relatórios.
 
-## Capacidades e Recursos Centrais
+## Funcionalidades
 
-### 1. Parser Inteligente de Alvos
-Reconhece e valida dinamicamente diferentes tipos de alvos no momento da entrada:
-- **Identificadores Digitais:** Endereços de e-mail, nomes de usuário (handles), números de telefone internacionais (E.164), domínios, subdomínios, endereços IPv4/IPv6 e blocos CIDR.
-- **Identificadores Nacionais:** Validação de formato e dígitos verificadores de CPF e CNPJ.
-- **Placas de Veículos:** Padrão Mercosul e formato clássico brasileiro de três letras.
-- **Criptoativos:** Endereços de carteiras Bitcoin (Legacy, SegWit e Bech32), Ethereum e Litecoin.
+- Reconhece e normaliza alvos: e-mail, usuário, telefone (E.164), domínio, IP/CIDR, CPF e CNPJ (com dígito verificador), placa Mercosul e antiga, carteiras BTC/ETH/LTC.
+- Roda 167 plugins em 26 categorias, em paralelo, cada um num contêiner isolado.
+- Adiciona ferramentas novas só com um arquivo YAML, sem mexer no código.
+- Aprofunda a busca: um e-mail ou usuário novo encontrado vira um novo alvo, com rastreio de origem.
+- Guarda casos, entidades e correlações em SQLite.
+- Gera grafo interativo em HTML, relatório em PDF e exportação CSV/JSON.
+- Oferece menu interativo no terminal e API REST.
 
-### 2. Sandboxing Estrito via Docker
-Todas as ferramentas investigativas externas (scrapers, scanners de portas, analisadores de metadados de arquivos e verificadores de vazamentos) executam em contêineres isolados com permissões restritas e descarte automático após a conclusão da tarefa.
+## Arquitetura
 
-### 3. Arquitetura Declarativa de Plugins
-Novas ferramentas podem ser adicionadas sem alterar o código principal da aplicação, criando um manifesto YAML no diretório `plugins/`:
-
-```yaml
-name: "shodan_lookup"
-category: "network"
-target_types: ["ip", "domain"]
-docker_image: "colombo/shodan-probe:latest"
-command: "python run.py --target {target}"
-requires_auth: true
-auth_key: "SHODAN_API_KEY"
+```mermaid
+flowchart TD
+    E["Entrada do investigador<br/>e-mail, domínio, IP, CPF, CNPJ, placa, carteira"] --> P[Parser de entidades]
+    P --> M["Motor central<br/>execução paralela"]
+    M --> D1["Plugin YAML → contêiner Docker"]
+    M --> D2["Plugin YAML → contêiner Docker"]
+    M --> D3["Plugin YAML → contêiner Docker"]
+    D1 --> C[("Casos · SQLite")]
+    D2 --> C
+    D3 --> C
+    C --> R["Relatórios<br/>PDF · grafo HTML · CSV/JSON"]
+    C --> A["API REST<br/>FastAPI :8000"]
 ```
 
-### 4. Varredura Recursiva (Deep Scan Pivot)
-Permite ao investigador autorizar desdobramentos automáticos: ao identificar um novo e-mail ou username em um vazamento de banco de dados, o motor adiciona o novo nó à fila de investigação com rastreamento de linhagem.
+## Requisitos
 
-### 5. Geração de Relatórios e Evidências
-- **Grafos Interativos em HTML:** Visualização de nós e arestas conectando alvos, infraestruturas compartilhadas e entidades relacionadas.
-- **Dossiês Formatais em PDF:** Relatórios consolidados com hash de integridade, carimbos de data/hora (*timestamps*) e classificação de criticidade.
-- **Exportação Estruturada:** Dados tabulares em formato CSV e JSON para ingestão em plataformas SIEM/SOC.
+- Linux (Ubuntu 22.04+, Debian 12, Kali) ou WSL2.
+- Docker Engine com o serviço rodando.
+- Python 3.10 ou superior.
 
----
+## Instalação
 
-## Modos de Operação
+1. Clone o repositório:
 
-### Modo Interativo CLI
-Interface interativa em terminal com menus navegáveis:
+   ```bash
+   git clone https://github.com/VituColombo0/Colombo-SCAN.git
+   ```
+
+2. Dê permissão ao script de inicialização:
+
+   ```bash
+   cd Colombo-SCAN && chmod +x run_colombo.sh
+   ```
+
+3. Crie o arquivo de variáveis a partir do modelo e preencha as chaves que tiver:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+Na primeira execução, o `run_colombo.sh` cria o ambiente virtual e instala as dependências.
+
+## Uso
+
+**Menu interativo:**
+
 ```bash
 ./run_colombo.sh
 ```
 
-### Modo Silencioso / Linha de Comando (Scripted)
-Execução direta para scripts e rotinas de triagem:
-```bash
-# Investigação de endereço IP
-./run_colombo.sh --alvo 198.51.100.24
+**Varredura direta de um alvo** (gera o relatório no fim):
 
-# Varredura recursiva de domínio com saída em PDF
-./run_colombo.sh --alvo example.com --deep --pdf
+```bash
+./run_colombo.sh --alvo 198.51.100.24
 ```
 
-### Modo Servidor / API REST
-Inicia o backend em **FastAPI** para integração com outras ferramentas:
+**API REST** (Swagger em `http://localhost:8000/docs`):
+
 ```bash
 ./run_colombo.sh --api
 ```
-A documentação interativa OpenAPI/Swagger estará disponível em `http://localhost:8000/docs`.
 
----
+| Método | Rota | Função |
+| :--- | :--- | :--- |
+| GET | `/plugins` · `/categories` | Lista plugins e categorias |
+| POST | `/scan` | Inicia uma varredura |
+| GET | `/scan/{scan_id}/results` | Resultado da varredura |
+| POST / GET | `/cases` | Cria e lista casos |
+| GET | `/cases/{case_id}` | Detalhe do caso |
+| GET | `/cases/{case_id}/entities` | Entidades do caso |
+| GET | `/cases/{case_id}/correlations` | Correlações do caso |
 
-## Pré-requisitos de Instalação
+## Configuração
 
-- **Linux** (testado em Ubuntu 22.04+, Debian 12 e Kali Linux) ou **WSL2** no Windows
-- **Docker Engine** e Docker Compose instalados e com daemon ativo
-- **Python 3.10** ou superior
+| Arquivo | Para quê |
+| :--- | :--- |
+| `.env` (modelo: [.env.example](.env.example)) | Chaves de APIs: Shodan, Censys, Hunter, HIBP, DeHashed, VirusTotal, OpenCorporates… |
+| `.scan_auth.yaml` | Cookies e tokens de sessão (GitHub, Instagram, Twitter, Shodan) injetados como variáveis de ambiente nos plugins |
 
----
+> [!IMPORTANT]
+> Nunca faça commit de chaves reais. O `.scan_auth.yaml` versionado traz só valores de exemplo;
+> preencha a sua cópia local e não a envie ao repositório.
 
-## Instalação e Inicialização
+## Plugins
 
-```bash
-# Clone o repositório
-git clone https://github.com/VituColombo0/Colombo-SCAN.git
-cd Colombo-SCAN
-
-# Permissão de execução no script utilitário
-chmod +x run_colombo.sh
-
-# Inicialize o ambiente (instala venv, dependências e compila contêineres base)
-./run_colombo.sh
-```
-
----
-
-## Gerenciamento de Chaves de API
-
-Chaves de serviços de inteligência externos são gerenciadas no arquivo `.scan_auth.yaml` (ignorado automaticamente pelo git):
+Cada plugin é um YAML em `plugins/<categoria>/`. Exemplo real
+(`plugins/geolocalização/ip-api_lookup.yaml`):
 
 ```yaml
-# .scan_auth.yaml
-SHODAN_API_KEY: "SUA_CHAVE_AQUI"
-VIRUSTOTAL_API_KEY: "SUA_CHAVE_AQUI"
-SECURITYTRAILS_API_KEY: "SUA_CHAVE_AQUI"
-HIBP_API_KEY: "SUA_CHAVE_AQUI"
+name: IP-API Lookup
+category: 🌍 Geolocalização
+description: IP-API Lookup plugin
+type: docker
+image: curlimages/curl
+command: -s http://ip-api.com/json/{alvo}
+inputs:
+- id: alvo
+  prompt: 'IP:'
 ```
 
-Variáveis de ambiente gerais podem ser definidas em `.env` a partir do template `.env.example`:
+**Categorias:** redes e IPs (25), geolocalização (12), vazamentos (12), identidades e usernames (10),
+e-mails (9), telefones (9), redes sociais (9), DevSecOps e vulnerabilidades (10), imagens (8),
+criptomoedas (8), documentos (6), superfície de ataque (11), IoT/Shodan (10), busca (5),
+empresas e CNPJ (4), áudio e vídeo forense (4), veículos e placas (3), dark web (3),
+busca reversa de imagem (3), voos (2) e outras. Como criar um plugin: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Testes
+
+Com o `pytest` instalado (`pip install pytest`):
+
 ```bash
-cp .env.example .env
+python -m pytest tests
 ```
 
----
+Os scripts `tests/bug_hunt_*.py` são verificações manuais da API e dos relatórios.
 
-## Estrutura do Repositório
+## Estrutura do projeto
 
 ```text
 Colombo-SCAN/
-├── api/              # Endpoints da API REST em FastAPI
-├── core/             # Engine central, normalizadores e executores concorrentes
-├── plugins/          # Definições declarativas de plugins em formato YAML
-├── ui/               # Componentes de interface de linha de comando (Rich/Questionary)
-├── scripts/          # Utilitários de verificação e rotinas de manutenção
-├── data/             # Armazenamento SQLite local de casos e sessões
-├── logs/             # Logs de auditoria e depuração técnica
-├── relatorios/       # Dossiês gerados, grafos HTML e exportações JSON/CSV
-├── tests/            # Testes unitários e de integração
-├── run_colombo.sh    # Script central de inicialização e deploy
-├── main.py           # Entrypoint do interpretador CLI
-└── README.md         # Documentação técnica do framework
+├── main.py           # ponto de entrada (menu, --alvo, --api)
+├── run_colombo.sh    # prepara o ambiente e chama o main.py
+├── core/             # motor, parser de entidades, casos, grafo, relatórios
+├── api/server.py     # API REST (FastAPI)
+├── ui/               # menus do terminal (Rich/Questionary)
+├── plugins/          # 167 plugins YAML em 26 categorias
+├── scripts/          # verificação de imagens e geradores de plugins
+├── tests/            # testes
+└── CONTRIBUTING.md   # como contribuir e criar plugins
 ```
 
----
+## Equipe
 
-## Termo de Uso e Responsabilidade Legal
+Desenvolvido por Victor Colombo.
 
-O **Colombo_SCAN** foi desenvolvido exclusivamente para finalidades defensivas, perícia computacional legalmente autorizada, treinamentos acadêmicos e auditorias autorizadas de segurança (Bug Bounty com autorização expressa). Os autores não se responsabilizam pelo uso inadequado ou ilícito das ferramentas integradas. Certifique-se de cumprir os termos de serviço (ToS) de todas as APIs consultadas.
+## Licença
+
+Todos os direitos reservados (o repositório ainda não tem arquivo de licença).
