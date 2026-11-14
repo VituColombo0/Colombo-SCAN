@@ -171,4 +171,4 @@ Desenvolvido por Victor Colombo.
 
 ## Licença
 
-Todos os direitos reservados (o repositório ainda não tem arquivo de licença).
+Distribuído sob a licença MIT. Veja [LICENSE](LICENSE).
