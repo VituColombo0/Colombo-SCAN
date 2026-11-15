@@ -57,8 +57,8 @@ class ParsedInput:
 
 def normalizar_telefone(raw: str) -> str:
     """Remove tudo que não é dígito de um telefone.
-    >>> normalizar_telefone("+55 35 999 343 863")
-    '5535999343863'
+    >>> normalizar_telefone("+55 11 912 345 678")
+    '5511912345678'
     """
     return re.sub(r"[^\d]", "", raw)
 
@@ -282,7 +282,7 @@ def parse_input_livre(raw_text: str) -> list[ParsedInput]:
     """Parse inteligente de qualquer texto com múltiplos alvos em qualquer formato.
 
     Aceita entradas como:
-      - "5535999453863 +55 35 999343863 35 99945 3863"
+      - "5511987654321 +55 11 912345678 11 98765 4321"
       - "joao@gmail.com, João Silva, 11999998888"
       - "192.168.1.1 example.com user@email.com"
 

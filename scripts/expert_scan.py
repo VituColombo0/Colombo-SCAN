@@ -14,7 +14,7 @@ engine = ColomboEngine()
 
 # Expert OSINT Constraints
 nome = "Victor Colombo"
-partial_phone = "35999"  # DDD 35, Mobile 9, prefix 99
+partial_phone = "11987"  # DDD 11, Mobile 9, prefix 87
 
 print(f"[+] Iniciando Investigação Pericial: {nome} + {partial_phone}******")
 
@@ -37,7 +37,7 @@ for d in custom_dorks:
 resultados.append(
     ScanResult(
         plugin_name="Expert_Dork_Correlation",
-        target="Victor Colombo 35999",
+        target="Fulano de Tal 11987",
         raw_output="\\n".join(dorks_output),
         layer=1,
         status="completed"

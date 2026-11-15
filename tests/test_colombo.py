@@ -347,19 +347,19 @@ class TestInputParser:
 
     def test_normalize_phone_clean(self):
         from core.input_parser import normalizar_telefone
-        assert normalizar_telefone("5535999453863") == "5535999453863"
+        assert normalizar_telefone("5511987654321") == "5511987654321"
 
     def test_normalize_phone_with_plus_spaces(self):
         from core.input_parser import normalizar_telefone
-        assert normalizar_telefone("+55 35 999343863") == "5535999343863"
+        assert normalizar_telefone("+55 11 912345678") == "5511912345678"
 
     def test_normalize_phone_with_hyphens(self):
         from core.input_parser import normalizar_telefone
-        assert normalizar_telefone("35 99945-3863") == "35999453863"
+        assert normalizar_telefone("11 98765-4321") == "11987654321"
 
     def test_normalize_phone_with_parens(self):
         from core.input_parser import normalizar_telefone
-        assert normalizar_telefone("(35) 99945-3863") == "35999453863"
+        assert normalizar_telefone("(11) 98765-4321") == "11987654321"
 
     def test_normalize_email(self):
         from core.input_parser import normalizar_email
@@ -386,11 +386,11 @@ class TestInputParser:
 
     def test_parse_single_phone(self):
         from core.input_parser import parse_input_livre
-        result = parse_input_livre("+55 35 999343863")
+        result = parse_input_livre("+55 11 912345678")
         assert len(result) >= 1
         phone_results = [r for r in result if r.tipo == "telefone"]
         assert len(phone_results) >= 1
-        assert "5535999343863" in phone_results[0].valor_normalizado
+        assert "5511912345678" in phone_results[0].valor_normalizado
 
     def test_parse_mixed_input_comma(self):
         from core.input_parser import parse_input_livre
@@ -432,8 +432,8 @@ class TestInputParser:
     def test_adaptar_telefone_para_plugin(self):
         from core.input_parser import adaptar_para_plugin, ParsedInput
         parsed = ParsedInput(
-            valor_original="+55 35 999343863",
-            valor_normalizado="5535999343863",
+            valor_original="+55 11 912345678",
+            valor_normalizado="5511912345678",
             tipo="telefone"
         )
         plugin = {"name": "PhoneInfoga", "category": "📱 Inteligência de Telefones"}
